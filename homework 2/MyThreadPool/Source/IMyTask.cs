@@ -2,6 +2,10 @@ using System;
 
 namespace Source
 {
+    /// <summary>
+    /// Provides interface for tasks
+    /// </summary>
+    /// <typeparam name="TResult">Type of task result</typeparam>
     public interface IMyTask<TResult>
     {
         /// <summary>

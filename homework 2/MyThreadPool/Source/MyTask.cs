@@ -3,12 +3,17 @@ namespace Source
     using System;
     using System.Threading;
 
+    /// <summary>
+    /// My task implementation for <see cref="MyThreadPool"/>
+    /// </summary>
+    /// <typeparam name="TResult">Type of task result</typeparam>
     public class MyTask<TResult> : IMyTask<TResult>
     {
         private readonly Func<TResult> _task;
         private readonly MyThreadPool _parentThreadPool;
-        private Exception _executionException;
         private readonly ManualResetEvent _executionFinishedEvent;
+        private Exception _executionException;
+
 
         public MyTask(Func<TResult> task, MyThreadPool parentThreadPool)
         {
