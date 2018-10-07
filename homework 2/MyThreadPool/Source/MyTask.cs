@@ -6,12 +6,14 @@ namespace Source
     public class MyTask<TResult> : IMyTask<TResult>
     {
         private readonly Func<TResult> _task;
+        private readonly MyThreadPool _parentThreadPool;
         private Exception _executionException;
-        private ManualResetEvent _executionFinishedEvent;
+        private readonly ManualResetEvent _executionFinishedEvent;
 
-        public MyTask(Func<TResult> task)
+        public MyTask(Func<TResult> task, MyThreadPool parentThreadPool)
         {
             _task = task;
+            _parentThreadPool = parentThreadPool;
             _executionFinishedEvent = new ManualResetEvent(false);
         }
 
@@ -34,16 +36,27 @@ namespace Source
         }
         public bool IsCompleted { get; private set; }
         
-        public IMyTask<TNewResult> ContinueWith<TNewResult>(System.Func<TResult, TNewResult> supplier)
+        public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> supplier)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                var newTask = _parentThreadPool.SheduleTask<TNewResult>(
+                    () => supplier(Result)
+                );
+
+                return newTask;
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
         }
 
         public void ExecuteTaskManually()
         {
             try
             {
-                Result = _task();
+                Result = _task.Invoke();
                 IsCompleted = true;
                 _executionFinishedEvent.Set();
             }

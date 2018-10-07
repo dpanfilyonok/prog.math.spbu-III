@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Collections.Concurrent;
 using System;
 
@@ -8,26 +7,22 @@ namespace Source
     public class MyThreadPool
     {
         private readonly int _amountOfThreads;
-
-        private Thread[] _threads;
-
-        private ConcurrentQueue<Action> _tasksQueue;
-
-        private AutoResetEvent _newTaskSheduledEvent;
-
-        private CancellationTokenSource _interruptPoolTokenSource;
+        private readonly Thread[] _threads;
+        private readonly ConcurrentQueue<Action> _tasksQueue;
+        private readonly AutoResetEvent _newTaskSheduled;
+        private readonly CancellationTokenSource _interruptPoolTokenSource;
 
         public MyThreadPool(int amountOfThreads)
         {
             _amountOfThreads = amountOfThreads;
-            _newTaskSheduledEvent = new AutoResetEvent(false);
+            _newTaskSheduled = new AutoResetEvent(false);
             _tasksQueue = new ConcurrentQueue<Action>();
             _interruptPoolTokenSource = new CancellationTokenSource();
             _threads = new Thread[_amountOfThreads];
 
             for (int i = 0; i < _amountOfThreads; ++i)
             {
-                _threads[i] = new Thread(TryToExecuteTask)
+                _threads[i] = new Thread(TryToExecuteTasks)
                 {
                     IsBackground = true,
                     Name = $"Thread {i}"
@@ -37,7 +32,7 @@ namespace Source
             }
         }
 
-        private void TryToExecuteTask()
+        private void TryToExecuteTasks()
         {
             while (true)
             {
@@ -45,25 +40,33 @@ namespace Source
                 {
                     task.Invoke();
                 }
+                else if (_interruptPoolTokenSource.IsCancellationRequested)
+                {
+                    break;
+                }
                 else
                 {
-                    _newTaskSheduledEvent.WaitOne();
+                    _newTaskSheduled.WaitOne();
                 }
             }
         }
 
         public IMyTask<TResult> SheduleTask<TResult>(Func<TResult> supplier)
         {
-            var task = new MyTask<TResult>(supplier);
+            if (_interruptPoolTokenSource.IsCancellationRequested)
+            {
+                throw new InvalidOperationException(
+                    "Current threadpool was shutdown, so you cant shedule tasks anymore"
+                );
+            }
+
+            var task = new MyTask<TResult>(supplier, this);
             _tasksQueue.Enqueue(task.ExecuteTaskManually);
-            _newTaskSheduledEvent.Set();
+            _newTaskSheduled.Set();
 
             return task;
         }
 
-        public void Shutdown()
-        {
-            _interruptPoolTokenSource.Cancel();
-        }
+        public void Shutdown() => _interruptPoolTokenSource.Cancel();
     }
 }
