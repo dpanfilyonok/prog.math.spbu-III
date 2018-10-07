@@ -11,7 +11,7 @@ namespace Source
         /// <exception cref="AggregateException">Contains information about exception during task</exception>
         /// <value>Evaluated result of the task</value>
         TResult Result { get; }
-
+        
         /// <summary>
         /// Return true, if task is completed
         /// </summary>
@@ -19,11 +19,11 @@ namespace Source
         bool IsCompleted { get; }
 
         /// <summary>
-        /// Apply 'newTask' to the result of current task and return new task
+        /// Apply 'supplier' to the result of current task and return new task
         /// </summary>
-        /// <param name="newTask"></param>
+        /// <param name="supplier"></param>
         /// <typeparam name="TNewResult"></typeparam>
         /// <returns></returns>
-        IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> newTask);
+        IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> supplier);
     }
 }

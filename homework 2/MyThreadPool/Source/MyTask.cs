@@ -18,14 +18,15 @@ namespace Source
         public TResult Result
         {
             get
-            {
+            {   // _executionFinishedEvent.Reset() не нужен тк Result уже вычислен
+                // и есть кто-то ещё захочет получить доступ к результату таска,
+                // он не заблокирует себе навечно поток ожиданием завершения исполнения
                 _executionFinishedEvent.WaitOne();
                 if (_executionException != null)
                 {
                     throw new AggregateException(_executionException);
                 }
 
-                _executionFinishedEvent.Reset();
                 return Result;
             }
 
@@ -33,7 +34,7 @@ namespace Source
         }
         public bool IsCompleted { get; private set; }
         
-        public IMyTask<TNewResult> ContinueWith<TNewResult>(System.Func<TResult, TNewResult> newTask)
+        public IMyTask<TNewResult> ContinueWith<TNewResult>(System.Func<TResult, TNewResult> supplier)
         {
             throw new System.NotImplementedException();
         }
