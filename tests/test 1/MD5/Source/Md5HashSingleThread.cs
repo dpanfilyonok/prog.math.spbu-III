@@ -22,7 +22,7 @@ namespace Source
             Array.Sort(files);
             foreach (var file in files)
             {
-                strBuilder.Append(GetMd5HashFromString(file, md5Hash));
+                strBuilder.Append(GetMd5HashFromString(File.ReadAllText(file) ,md5Hash));
             }
 
             var dirs = Directory.GetDirectories(pathToDir);
