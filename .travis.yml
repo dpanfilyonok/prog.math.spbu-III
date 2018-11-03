@@ -1,4 +1,5 @@
 language: csharp
+solution: ./homework\ 1/Lazy/Lazy.sln.sln
 
 git:
   depth: 1
@@ -6,11 +7,12 @@ git:
 mono: none
 dotnet: 2.0.0
 
-matrix:
-  include:
-    - script:
-        - ls
-        - cd ./homeWork\ 1/Lazy && dotnet restore && dotnet build
-    - script:
-        - cd ./homeWork\ 1/Lazy/Tests/
-        - dotnet test
+branches:
+  only:
+    - hw_1/Lazy
+  
+script:
+  - pwd
+  - ls
+  - ls ./homework\ 1/
+  - cd ./homework\ 1/Lazy/ && dotnet restore && dotnet test
