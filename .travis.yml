@@ -11,8 +11,9 @@ branches:
   only:
     - hw_1/Lazy
   
-script:
-  - pwd
-  - ls
-  - ls ./homework\ 1/
-  - cd ./homework\ 1/Lazy/ && dotnet restore && dotnet test
+matrix:
+  include:
+    - script:
+      - cd ./homeWork\ 1/Lazy && dotnet restore && dotnet build
+    - script:
+      - dotnet test ./homework\ 1/Lazy/Tests/
