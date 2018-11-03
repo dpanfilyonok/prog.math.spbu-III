@@ -12,10 +12,29 @@ namespace Tests
         {
             string testString = "hello";
             Func<string> supplier = () => testString;
+
             var lazy = LazyFactory<string>.CreateOneThreadLazy(supplier);
             var obj1 = lazy.Get();
             var obj2 = lazy.Get();
+
             Assert.AreSame(obj1, obj2);
+        }
+
+        [TestMethod]
+        public void SupplierShouldBeCalculatedOnce()
+        {
+            int counter = 0;
+            var supplier = new Func<int>(() =>
+            {
+                counter++;
+                return counter;
+            });
+
+            var lazy = LazyFactory<int>.CreateOneThreadLazy(supplier);
+            var obj1 = lazy.Get();
+            var obj2 = lazy.Get();
+
+            Assert.AreEqual(1, counter);
         }
 
         [TestMethod]
@@ -31,24 +50,9 @@ namespace Tests
             var lazy = LazyFactory<int?>.CreateOneThreadLazy(() => null);
             var obj1 = lazy.Get();
             var obj2 = lazy.Get();
+
             Assert.IsNull(obj1);
             Assert.IsNull(obj2);
-        }
-
-        [TestMethod]
-        public void SupplierShouldBeCalculatedOnce()
-        {
-            int counter = 0;
-            var supplier = new Func<int>(() => {
-                counter++;
-                return counter;
-            });
-
-            var lazy = LazyFactory<int>.CreateOneThreadLazy(supplier);
-            var obj1 = lazy.Get();
-            var obj2 = lazy.Get();
-            Assert.AreEqual(1, obj2);
-            Assert.AreEqual(1, counter);
         }
     }
 }
