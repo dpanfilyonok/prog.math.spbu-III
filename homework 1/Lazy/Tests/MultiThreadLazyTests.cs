@@ -5,6 +5,9 @@ using Source;
 
 namespace Tests
 {
+    /// <summary>
+    /// Тесты на корректность работы <see cref="MultiThreadLazy">
+    /// </summary>
     [TestClass]
     public class MultiThreadLazyTests
     {

@@ -4,6 +4,9 @@ using System;
 
 namespace Tests
 {
+    /// <summary>
+    /// Тесты на корректность работы <see cref="OneThreadLazy">
+    /// </summary>
     [TestClass]
     public class OneThreadLazyTests
     {
