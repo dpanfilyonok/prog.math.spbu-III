@@ -9,7 +9,8 @@ dotnet: 2.0.0
 matrix:
   include:
     - script:
+        - ls
         - cd ./homeWork\ 1/Lazy && dotnet restore && dotnet build
     - script:
-        - cd ./homeWork\ 5/Lazy/Tests/
+        - cd ./homeWork\ 1/Lazy/Tests/
         - dotnet test
