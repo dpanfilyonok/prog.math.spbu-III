@@ -1,0 +1,15 @@
+language: csharp
+
+git:
+  depth: 1
+
+mono: none
+dotnet: 2.0.0
+
+matrix:
+  include:
+    - script:
+        - cd ./homeWork\ 1/Lazy && dotnet restore && dotnet build
+    - script:
+        - cd ./homeWork\ 5/Lazy/Tests/
+        - dotnet test
