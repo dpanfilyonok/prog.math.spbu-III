@@ -6,12 +6,13 @@ namespace Source
     using System.Net.Sockets;
     using System.Threading.Tasks;
     using System.Collections.Generic;
+    using System.Text;
 
     public class SimpleFTPServer
     {
         private TcpListener _tcpServer;
         private const int _port = 2121;
-        enum Methods
+        private enum Methods
         {
             List = 1,
             Get = 2
@@ -39,27 +40,84 @@ namespace Source
             await Task.Run(async () =>
             {
                 Console.WriteLine("Подключен клиент. Выполнение запроса...");
-                var networkStream = user.GetStream();
-                var reader = new StreamReader(networkStream);
-                var request = await reader.ReadToEndAsync();
-                var (method, path) = ParseRequest(request);
-                switch (method)
+                // поток, в которос происходит общение
+                using (var networkStream = user.GetStream())
                 {
-                    case (int)Methods.List:
-                    // формируем ответ из контента:
-                        var content = GetListOfContentsInDir(path);
-                        break;
-                    case (int)Methods.Get:
-                        break;
-                    default:
-                        throw new WebException("Invalid method");
+                    // todo: обработать завершение сеанса
+                    while (true)
+                    {
+                        var request = await ProcessRequestAsync(networkStream);
+                        ProcessResponseAsync(networkStream, request);
+                        // * пойдет принимать следующий запрос => может быть ситуация,
+                        // * когда ц запрос выполниться раньше первого
+                    }
                 }
-                
-                // тут нужно просто асинхроно дать ответ
             });
         }
 
-        private List<Tuple<string, bool>> GetListOfContentsInDir(string pathToDir)
+        private async Task<(Methods, string)> ProcessRequestAsync(NetworkStream stream)
+        {
+            string request;
+            using (var reader = new StreamReader(stream))
+            {
+                request = await reader.ReadToEndAsync();
+            }
+
+            return ParseRequest(request);
+        }
+
+        private (Methods, string) ParseRequest(string request)
+        {
+            var splited = request.Split();
+            return ((Methods)Convert.ToInt32(splited[0]), splited[1]);
+        }
+
+        private async void ProcessResponseAsync(NetworkStream stream, (Methods method, string path) request)
+        {
+            byte[] response;
+            switch (request.method)
+            {
+                case Methods.List:
+                    {
+                        try
+                        {
+                            var content = GetListOfElementsInDir(request.path);
+                            response = CreateResponseOfListMethod(content);
+                        }
+                        catch (DirectoryNotFoundException)
+                        {
+                            response = BitConverter.GetBytes(-1);
+                        }
+
+                        break;
+                    }
+                case Methods.Get:
+                    {
+                        try
+                        {
+                            var content = await BinaryContentOfFileAsync(request.path);
+                            response = CreateResponseOfGetMethod(content);
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            response = BitConverter.GetBytes(-1);
+                        }
+
+                        break;
+                    }
+                default:
+                    throw new WebException("Invalid method");
+
+            }
+
+            using (var writer = new BinaryWriter(stream))
+            {
+                writer.Write(response);
+            }
+        }
+
+        #region ListStuff
+        private List<(string, bool)> GetListOfElementsInDir(string pathToDir)
         {
             if (!Directory.Exists(pathToDir))
             {
@@ -69,25 +127,66 @@ namespace Source
             var root = new DirectoryInfo(pathToDir);
             var files = root.EnumerateFiles();
             var dirs = root.EnumerateDirectories();
-            var listOfContent = new List<Tuple<string, bool>>();
-            
+            var listOfContent = new List<(string, bool)>();
+
             foreach (var file in files)
             {
-                listOfContent.Add(new Tuple<string, bool>(file.Name, false));
+                listOfContent.Add((file.Name, false));
             }
 
             foreach (var dir in dirs)
             {
-                listOfContent.Add(new Tuple<string, bool>(dir.Name, true));
+                listOfContent.Add((dir.Name, true));
             }
 
             return listOfContent;
         }
 
-        private (int method, string path) ParseRequest(string request)
+        private byte[] CreateResponseOfListMethod(List<(string, bool)> content)
         {
-            var splited = request.Split();
-            return (Convert.ToInt32(splited[0]), splited[1]);
+            var response = new StringBuilder();
+            response.Append(content.Count);
+            response.Append(' ');
+            foreach (var pair in content)
+            {
+                response.AppendJoin(' ', pair);
+                response.Append(' ');
+            }
+
+            response.AppendLine();
+            return Encoding.Default.GetBytes(response.ToString());
         }
+
+        #endregion
+
+        #region GetStuff
+        private async Task<byte[]> BinaryContentOfFileAsync(string pathToFile)
+        {
+            if (!File.Exists(pathToFile))
+            {
+                throw new FileNotFoundException(pathToFile);
+            }
+
+            return await File.ReadAllBytesAsync(pathToFile);
+        }
+
+        private byte[] CreateResponseOfGetMethod(byte[] content)
+        {
+            var contentSize = content.LongLength;
+            var space = ' ';
+
+            var sizeConverted = BitConverter.GetBytes(contentSize);
+            var spaceConverted = BitConverter.GetBytes(space);
+
+            var response = new byte[sizeConverted.Length + spaceConverted.Length + content.Length];
+
+            sizeConverted.CopyTo(response, 0);
+            spaceConverted.CopyTo(response, sizeConverted.Length);
+            content.CopyTo(response, spaceConverted.Length);
+
+            return response;
+        }
+
+        #endregion
     }
 }
