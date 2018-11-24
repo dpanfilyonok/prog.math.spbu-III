@@ -12,7 +12,7 @@ namespace Source
     {
         private TcpListener _tcpServer;
         private CancellationTokenSource _cts;
-        private volatile int _amountOfActualConnections;
+        private int _amountOfActualConnections;
         private ManualResetEvent _lackOfActualConnectionsEvent;
         private object _lockObject;
 

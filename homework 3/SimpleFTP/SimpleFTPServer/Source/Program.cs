@@ -6,8 +6,8 @@ namespace Source
     {
         static void Main(string[] args)
         {
-            string host = "192.168.0.102";
-            int port = int.Parse(args[0]);
+            const string host = "192.168.0.102";
+            const int port = 2121;
 
             var server = new SimpleFTPServer(host, port);
             try

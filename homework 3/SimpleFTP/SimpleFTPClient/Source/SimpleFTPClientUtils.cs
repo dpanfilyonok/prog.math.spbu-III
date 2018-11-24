@@ -48,7 +48,7 @@ namespace Source
 
             if (size == -1)
             {
-                return null;
+                throw new DirectoryNotFoundException("Directory don`t exist on server");
             }
 
             var listOfContent = new List<(string, bool)>();
