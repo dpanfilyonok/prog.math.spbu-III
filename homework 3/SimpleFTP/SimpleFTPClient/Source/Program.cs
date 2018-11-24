@@ -8,16 +8,35 @@ namespace Source
         static async Task Main(string[] args)
         {
             const string ip = "192.168.0.102";
-            const int port = 2121;
+            const int port = 2120;
             const string path = "/home/anticnvm";
+            const string pathToFile = "/home/anticnvm/Documents/3hgCRSwc4fU.png";
 
             var client = new SimpleFTPClient();
 
-            var response = await client.ListAsync(ip, port, path);
-            foreach (var pair in response)
+            switch (args[0])
             {
-                Console.WriteLine($"{pair.Item1} {pair.Item2}");
+                case "list":
+                    {
+                        var response = await client.ListAsync(ip, port, path);
+                        foreach (var pair in response)
+                        {
+                            Console.WriteLine($"{pair.Item1} {pair.Item2}");
+                        }
+                        break;
+                    }
+                case "get":
+                    {
+                        await client.GetFileAsync(ip, port, pathToFile, @"/home/anticnvm/2.png");
+                        Console.WriteLine("LUL");
+                        break;
+                    }
+
+                default:
+                    break;
             }
+
+            // обработать исключения связанные с неверно заданным хостом
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Source
     {
         private TcpListener _tcpServer;
         private CancellationTokenSource _cts;
-        private volatile int _amountOfActualConnections; 
+        private volatile int _amountOfActualConnections;
         private ManualResetEvent _lackOfActualConnectionsEvent;
         private object _lockObject;
 
@@ -46,7 +46,7 @@ namespace Source
                 {
                     _amountOfActualConnections++;
                 }
-                
+
                 ServeRequestAsync(client);
             }
 
@@ -60,22 +60,20 @@ namespace Source
             {
                 await Task.Run(async () =>
                 {
+                    var clientEP = client.Client.RemoteEndPoint.ToString();
                     using (var networkStream = client.GetStream())
                     {
                         var request = await ProcessRequestAsync(networkStream);
                         await ProcessResponseAsync(networkStream, request);
                     }
 
-                    Console.WriteLine($"Client on {client.Client.RemoteEndPoint} served.");
+                    Console.WriteLine($"Client on {clientEP} served.");
+                    DisconnectClient(client);
                 });
             }
             catch (ConnectionRefusedException e)
             {
                 Console.WriteLine(e.Message);
-            }
-            finally
-            {
-                Console.WriteLine("Closing connection...");
                 DisconnectClient(client);
             }
         }
@@ -144,7 +142,15 @@ namespace Source
 
         private void DisconnectClient(TcpClient client)
         {
-            client.Close();
+            if (client.Connected)
+            {
+                Console.WriteLine("Closing connection...");
+                client.Close();
+            }
+            else
+            {
+                Console.WriteLine("Connection were closed by client side.");
+            }
 
             lock (_lockObject)
             {

@@ -6,7 +6,10 @@ namespace Source
     {
         static void Main(string[] args)
         {
-            var server = new SimpleFTPServer("192.168.0.102", int.Parse(args[0]));
+            string host = "192.168.0.102";
+            int port = int.Parse(args[0]);
+
+            var server = new SimpleFTPServer(host, port);
             try
             {
                 server.Start();

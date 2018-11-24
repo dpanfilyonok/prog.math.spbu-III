@@ -11,7 +11,7 @@ namespace Source
 {
     public class SimpleFTPClient
     {
-        #region List
+        #region ListAsync
         public async Task<List<(string, bool)>> ListAsync(string hostIp, int hostPort, string path)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
@@ -29,9 +29,9 @@ namespace Source
                 {
                     client.Connect(host);
                 }
-                catch (SocketException e)
+                catch (SocketException)
                 {
-                    throw e; //?????
+                    throw;
                 }
 
                 using (var stream = client.GetStream())
@@ -49,7 +49,7 @@ namespace Source
 
         #endregion
 
-        #region GetByteArray
+        #region GetByteArrayAsync
         public async Task<byte[]> GetByteArrayAsync(string hostIp, int hostPort, string path)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
@@ -67,9 +67,9 @@ namespace Source
                 {
                     client.Connect(host);
                 }
-                catch (SocketException e)
+                catch (SocketException)
                 {
-                    throw e; //?????
+                    throw; 
                 }
 
                 using (var stream = client.GetStream())
@@ -93,7 +93,7 @@ namespace Source
 
         #endregion
 
-        #region GetFile
+        #region GetFileAsync
         public async Task GetFileAsync(string hostIp, int hostPort, string path, string pathToSave)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
