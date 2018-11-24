@@ -4,6 +4,10 @@ namespace Source
 {
     class Program
     {
+        /// <summary>
+        /// Running server on port
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             const string host = "192.168.0.102";
@@ -14,9 +18,9 @@ namespace Source
             {
                 server.Start();
             }
-            catch (ArgumentNullException)
+            catch (Exception)
             {
-                Console.WriteLine("kek");
+                Console.WriteLine("O_O");
             }
 
             Console.ReadKey();

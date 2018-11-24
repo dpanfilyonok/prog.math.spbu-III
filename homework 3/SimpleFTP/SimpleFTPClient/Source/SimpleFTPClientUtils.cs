@@ -7,8 +7,17 @@ using Source.Exceptions;
 
 namespace Source
 {
+    /// <summary>
+    /// Utils for <see cref="SimpleFTPClient"/>
+    /// </summary>
     internal static class SimpleFTPClientUtils
     {
+        /// <summary>
+        /// Form string request from method and path
+        /// </summary>
+        /// <param name="method">Request method</param>
+        /// <param name="path">Path</param>
+        /// <returns>Request string</returns>
         internal static string FormRequest(Methods method, string path)
         {
             var sBuilder = new StringBuilder();
@@ -19,6 +28,12 @@ namespace Source
             return sBuilder.ToString();
         }
 
+        /// <summary>
+        /// Convert string IP and int port to IPEndPoint object
+        /// </summary>
+        /// <param name="hostIp"></param>
+        /// <param name="hostPort"></param>
+        /// <returns></returns>
         internal static IPEndPoint ConvertToEndPoint(string hostIp, int hostPort)
         {
             if (!IPAddress.TryParse(hostIp, out IPAddress ip))
@@ -34,6 +49,11 @@ namespace Source
             return new IPEndPoint(ip, hostPort);
         }
 
+        /// <summary>
+        /// Parses string response from list method to list of (string, bool)
+        /// </summary>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="InvalidResponseFormatException"></exception>
         internal static List<(string, bool)> ParseListResponse(string content)
         {
             var splited = content.Trim().Split('&');

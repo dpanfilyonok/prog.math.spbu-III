@@ -1,5 +1,8 @@
 namespace Source.Exceptions
 {
+    /// <summary>
+    /// Throws if method response format is invalid
+    /// </summary>
     [System.Serializable]
     public class InvalidResponseFormatException : System.Exception
     {

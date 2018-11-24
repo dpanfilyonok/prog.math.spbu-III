@@ -8,6 +8,9 @@ namespace Source
     using System.Threading;
     using Source.Exceptions;
 
+    /// <summary>
+    /// Simple FTP server with couple of methods
+    /// </summary>
     public class SimpleFTPServer
     {
         private TcpListener _tcpServer;
@@ -16,7 +19,14 @@ namespace Source
         private ManualResetEvent _lackOfActualConnectionsEvent;
         private object _lockObject;
 
+        /// <summary>
+        /// Local server IP.
+        /// </summary>
         public string Address { get; }
+
+        /// <summary>
+        /// The port on which to listen for incoming connection attempts.
+        /// </summary>
         public int Port { get; }
 
         public SimpleFTPServer(string address, int port = 2121)
@@ -32,10 +42,12 @@ namespace Source
             _tcpServer.Start();
         }
 
+        /// <summary>
+        /// Start listening mentioned port and execute requests.
+        /// </summary>
         public void Start()
         {
             Console.WriteLine($"Server started, listening port {Port} ...");
-
             while (!_cts.IsCancellationRequested)
             {
                 Console.WriteLine("Waiting for a connections...");
@@ -163,6 +175,9 @@ namespace Source
             }
         }
 
+        /// <summary>
+        /// Stop listening.
+        /// </summary>
         public void Stop()
         {
             _cts.Cancel();

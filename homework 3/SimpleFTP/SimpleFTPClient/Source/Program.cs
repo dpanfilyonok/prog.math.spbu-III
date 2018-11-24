@@ -5,6 +5,11 @@ namespace Source
 {
     class Program
     {
+        /// <summary>
+        /// Make request to server depending on cli arguments
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         static async Task Main(string[] args)
         {
             const string ip = "192.168.0.102";
@@ -16,7 +21,7 @@ namespace Source
 
             switch (args[0])
             {
-                case "list":
+                case "--list":
                     {
                         var response = await client.ListAsync(ip, port, path);
                         foreach (var pair in response)
@@ -25,7 +30,7 @@ namespace Source
                         }
                         break;
                     }
-                case "get":
+                case "--get":
                     {
                         await client.GetFileAsync(ip, port, pathToFile, @"/home/anticnvm/2.png");
                         Console.WriteLine("LUL");
@@ -35,8 +40,6 @@ namespace Source
                 default:
                     break;
             }
-
-            // обработать исключения связанные с неверно заданным хостом
         }
     }
 }

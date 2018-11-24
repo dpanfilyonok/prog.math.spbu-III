@@ -1,5 +1,8 @@
 ﻿namespace Source.Exceptions
 {
+    /// <summary>
+    /// Throws when connection refused
+    /// </summary>
     [System.Serializable]
     public class ConnectionRefusedException : System.Exception
     {

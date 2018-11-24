@@ -5,8 +5,16 @@ using System.Text;
 
 namespace Source
 {
+    /// <summary>
+    /// Utils methods for <see cref="SimpleFTPServer"/>
+    /// </summary>
     internal static class SimpleFTPServerUtils
     {
+        /// <summary>
+        /// Parse request in format "int string" to pair of request method and path
+        /// </summary>
+        /// <exception cref="ArgumentNullException">'request' is null</exception>
+        /// <returns>(request method, path)</returns>
         internal static (Methods, string) ParseRequest(string request)
         {
             if (request == null)
@@ -18,6 +26,11 @@ namespace Source
             return ((Methods)Convert.ToInt32(splited[0]), splited[1]);
         }
 
+        /// <summary>
+        /// Returns content of mentioned directory as list of (string, bool)
+        /// </summary>
+        /// <param name="pathToDir">Path to diectory</param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
         internal static List<(string, bool)> GetListOfElementsInDir(string pathToDir)
         {
             if (!Directory.Exists(pathToDir))
@@ -43,6 +56,10 @@ namespace Source
             return listOfContent;
         }
 
+        /// <summary>
+        /// Create response string from list of (string, bool)
+        /// </summary>
+        /// <returns>Response string for List method</returns>
         internal static string CreateResponseOfListMethod(List<(string, bool)> content)
         {
             var response = new StringBuilder();
@@ -58,6 +75,12 @@ namespace Source
             return response.ToString();
         }
 
+        /// <summary>
+        /// Returns filestream for reading
+        /// </summary>
+        /// <param name="pathToFile">File for reading</param>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <returns>File stream</returns>
         internal static FileStream GetReadableFileStream(string pathToFile)
         {
             if (!File.Exists(pathToFile))

@@ -10,15 +10,33 @@ namespace Source
     using GetByteArrayResponseType = Task<byte[]>;
     using GetFileResponseType = Task;
 
+    /// <summary>
+    /// Class, that provides SimpleFTP methods 
+    /// </summary>
     public class SimpleFTPClient
     {
         #region ListAsync
+        /// <summary>
+        /// Returns content of directory on server
+        /// </summary>
+        /// <param name="hostIp">Server remote IP</param>
+        /// <param name="hostPort">Server remote port</param>
+        /// <param name="path">Path to dir</param>
+        /// <exception cref="SocketException"></exception>
+        /// <returns>List of content</returns>
         public async ListResponseType ListAsync(string hostIp, int hostPort, string path)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
             return await ListAsync(host, path);
         }
 
+        /// <summary>
+        /// Returns content of directory on server
+        /// </summary>
+        /// <param name="host">Remote server address</param>
+        /// <param name="path">Path to dir</param>
+        /// <exception cref="SocketException"></exception>
+        /// <returns>List of content</returns>
         public async ListResponseType ListAsync(IPEndPoint host, string path)
         {
             var request = SimpleFTPClientUtils.FormRequest(Methods.List, path);
@@ -51,12 +69,27 @@ namespace Source
         #endregion
 
         #region GetByteArrayAsync
+        /// <summary>
+        /// Returns content of file on server as byte array
+        /// </summary>
+        /// <param name="hostIp">Server remote IP</param>
+        /// <param name="hostPort">Server remote port</param>
+        /// <param name="path">Path to file</param>
+        /// <exception cref="SocketException"></exception>
+        /// <returns>File content as byte array</returns>
         public async GetByteArrayResponseType GetByteArrayAsync(string hostIp, int hostPort, string path)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
             return await GetByteArrayAsync(host, path);
         }
 
+        /// <summary>
+        /// Returns content of file on server as byte array
+        /// </summary>
+        /// <param name="host">Remote server address</param>
+        /// <param name="path">Path to file</param>
+        /// <exception cref="SocketException"></exception>
+        /// <returns>File content as byte array</returns>
         public async GetByteArrayResponseType GetByteArrayAsync(IPEndPoint host, string path)
         {
             var request = SimpleFTPClientUtils.FormRequest(Methods.Get, path);
@@ -93,14 +126,29 @@ namespace Source
         }
 
         #endregion
-    
+
         #region GetFileAsync
+        /// <summary>
+        /// Download file from remote server
+        /// </summary>
+        /// <param name="hostIp">Server remote IP</param>
+        /// <param name="hostPort">Server remote port</param>
+        /// <param name="path">Path to file on server</param>
+        /// <param name="pathToSave">Path where to download file</param>
+        /// <exception cref="SocketException"></exception>
         public async GetFileResponseType GetFileAsync(string hostIp, int hostPort, string path, string pathToSave)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
             await GetFileAsync(host, path, pathToSave);
         }
 
+        /// <summary>
+        /// Download file from remote server
+        /// </summary>
+        /// <param name="host">Remote server address</param>
+        /// <param name="path">Path to file server</param>
+        /// <param name="pathToSave">Path where to download file</param>
+        /// <exception cref="SocketException"></exception>
         public async GetFileResponseType GetFileAsync(IPEndPoint host, string path, string pathToSave)
         {
             var request = SimpleFTPClientUtils.FormRequest(Methods.Get, path);
@@ -126,7 +174,7 @@ namespace Source
                     {
                         throw new FileNotFoundException("File don`t exist on server", path);
                     }
-                    
+
                     using (var fstream = new FileStream(pathToSave, FileMode.CreateNew))
                     {
                         await stream.CopyToAsync(fstream);
