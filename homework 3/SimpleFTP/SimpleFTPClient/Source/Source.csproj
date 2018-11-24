@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\SimpleFTPProtocol\Source\Source.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <AssemblyName>ClientSource</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>7.1</LangVersion>
+    <NoWarn>NU1603</NoWarn>
+  </PropertyGroup>
+
+</Project>
