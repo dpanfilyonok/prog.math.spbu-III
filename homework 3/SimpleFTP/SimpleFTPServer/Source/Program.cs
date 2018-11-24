@@ -6,12 +6,12 @@ namespace Source
     {
         static void Main(string[] args)
         {
-            var server = new SimpleFTPServer("192.168.0.102", 2121);
+            var server = new SimpleFTPServer("192.168.0.102", int.Parse(args[0]));
             try
             {
                 server.Start();
             }
-            catch(ArgumentNullException)
+            catch (ArgumentNullException)
             {
                 Console.WriteLine("kek");
             }

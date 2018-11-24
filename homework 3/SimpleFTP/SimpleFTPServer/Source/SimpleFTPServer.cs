@@ -5,14 +5,17 @@ namespace Source
     using System.Net;
     using System.Net.Sockets;
     using System.Threading.Tasks;
-    using System.Collections.Generic;
-    using System.Text;
     using System.Threading;
+    using Source.Exceptions;
 
     public class SimpleFTPServer
     {
         private TcpListener _tcpServer;
         private CancellationTokenSource _cts;
+        private volatile int _amountOfActualConnections; 
+        private ManualResetEvent _lackOfActualConnectionsEvent;
+        private object _lockObject;
+
         public string Address { get; }
         public int Port { get; }
 
@@ -22,6 +25,9 @@ namespace Source
             Address = address;
             _tcpServer = new TcpListener(IPAddress.Parse(address), port);
             _cts = new CancellationTokenSource();
+            _amountOfActualConnections = 0;
+            _lackOfActualConnectionsEvent = new ManualResetEvent(true);
+            _lockObject = new object();
 
             _tcpServer.Start();
         }
@@ -29,49 +35,69 @@ namespace Source
         public void Start()
         {
             Console.WriteLine($"Server started, listening port {Port} ...");
+
             while (!_cts.IsCancellationRequested)
             {
                 Console.WriteLine("Waiting for a connections...");
                 var client = _tcpServer.AcceptTcpClient();
 
-                Console.WriteLine($"Client on {client.Client.AddressFamily} connected. Executing request async...");
-                try
+                Console.WriteLine($"Client on {client.Client.RemoteEndPoint} connected. Executing request async...");
+                lock (_lockObject)
                 {
-                    ServeRequestAsync(client);
+                    _amountOfActualConnections++;
                 }
-                catch (Exception e)
+                
+                ServeRequestAsync(client);
+            }
+
+            _lackOfActualConnectionsEvent.WaitOne();
+            _tcpServer.Stop();
+        }
+
+        private async void ServeRequestAsync(TcpClient client)
+        {
+            try
+            {
+                await Task.Run(async () =>
                 {
-                    Console.WriteLine(e.Message);
-                }
-                finally
-                {
-                    client.Close();
-                    _tcpServer.Stop();
-                }
+                    using (var networkStream = client.GetStream())
+                    {
+                        var request = await ProcessRequestAsync(networkStream);
+                        await ProcessResponseAsync(networkStream, request);
+                    }
+
+                    Console.WriteLine($"Client on {client.Client.RemoteEndPoint} served.");
+                });
+            }
+            catch (ConnectionRefusedException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                Console.WriteLine("Closing connection...");
+                DisconnectClient(client);
             }
         }
 
-        private async void ServeRequestAsync(TcpClient user)
-        {
-            await Task.Run(async () =>
-            {
-                using (var networkStream = user.GetStream())
-                {
-                    var request = await ProcessRequestAsync(networkStream);
-                    ProcessResponseAsync(networkStream, request);
-                }
-            });
-        }
-
+        /// <exception cref="ConnectionRefusedException"> => client close net stream</exception>
         private async Task<(Methods, string)> ProcessRequestAsync(NetworkStream stream)
         {
             var reader = new StreamReader(stream);
             var request = await reader.ReadLineAsync();
 
+            if (request == null)
+            {
+                throw new ConnectionRefusedException(
+                    "Connection were refused via client by closing network stream."
+                );
+            }
+
             return SimpleFTPServerUtils.ParseRequest(request);
         }
 
-        private async void ProcessResponseAsync(NetworkStream stream, (Methods method, string path) request)
+        /// <exception cref="WebException"> => invalid method in response</exception>
+        private async Task ProcessResponseAsync(NetworkStream stream, (Methods method, string path) request)
         {
             var writer = new StreamWriter(stream) { AutoFlush = true };
             switch (request.method)
@@ -113,6 +139,21 @@ namespace Source
                 default:
                     throw new WebException("Invalid method");
 
+            }
+        }
+
+        private void DisconnectClient(TcpClient client)
+        {
+            client.Close();
+
+            lock (_lockObject)
+            {
+                _amountOfActualConnections--;
+            }
+
+            if (_amountOfActualConnections == 0)
+            {
+                _lackOfActualConnectionsEvent.Set();
             }
         }
 
