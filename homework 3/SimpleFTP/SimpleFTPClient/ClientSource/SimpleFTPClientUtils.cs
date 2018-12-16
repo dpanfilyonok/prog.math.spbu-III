@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using Source.Exceptions;
+using ClientSource.Exceptions;
+using ProtocolSource;
 
-namespace Source
+namespace ClientSource
 {
     /// <summary>
     /// Utils for <see cref="SimpleFTPClient"/>

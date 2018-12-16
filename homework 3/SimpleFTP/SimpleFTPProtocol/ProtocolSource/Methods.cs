@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Source
+namespace ProtocolSource
 {
     /// <summary>
     /// Avaliable methods of SimpleFTP protocol

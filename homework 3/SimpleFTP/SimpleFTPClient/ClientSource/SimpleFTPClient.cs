@@ -3,8 +3,9 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using ProtocolSource;
 
-namespace Source
+namespace ClientSource
 {
     using ListResponseType = Task<List<(string, bool)>>;
     using GetByteArrayResponseType = Task<byte[]>;

@@ -1,4 +1,4 @@
-﻿namespace Source.Exceptions
+﻿namespace ServerSource.Exceptions
 {
     /// <summary>
     /// Throws when connection refused

@@ -5,15 +5,15 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimpleFTPServer", "SimpleFTPServer", "{725BCE6B-2E3A-4A1F-BB8A-63FB639FE2F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Source", "SimpleFTPServer\Source\Source.csproj", "{A5CA1535-CC81-47D4-A8A4-16237E94E1C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerSource", "SimpleFTPServer\ServerSource\ServerSource.csproj", "{A5CA1535-CC81-47D4-A8A4-16237E94E1C4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimpleFTPClient", "SimpleFTPClient", "{FFD65617-4308-46E2-A31E-750A1330FAD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Source", "SimpleFTPClient\Source\Source.csproj", "{7C174203-06EE-48C8-B0DA-73F44543471D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientSource", "SimpleFTPClient\ClientSource\ClientSource.csproj", "{7C174203-06EE-48C8-B0DA-73F44543471D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimpleFTPProtocol", "SimpleFTPProtocol", "{A7EA8B64-A96C-4E9F-A70C-C89D3E71504E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Source", "SimpleFTPProtocol\Source\Source.csproj", "{633690CC-B2E9-4109-AF2C-729304E9B762}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtocolSource", "SimpleFTPProtocol\ProtocolSource\ProtocolSource.csproj", "{633690CC-B2E9-4109-AF2C-729304E9B762}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

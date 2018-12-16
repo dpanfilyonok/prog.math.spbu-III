@@ -1,4 +1,4 @@
-namespace Source.Exceptions
+namespace ClientSource.Exceptions
 {
     /// <summary>
     /// Throws if method response format is invalid

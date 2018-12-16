@@ -1,4 +1,4 @@
-namespace Source
+namespace ServerSource
 {
     using System;
     using System.IO;
@@ -6,7 +6,8 @@ namespace Source
     using System.Net.Sockets;
     using System.Threading.Tasks;
     using System.Threading;
-    using Source.Exceptions;
+    using ServerSource.Exceptions;
+    using ProtocolSource;
 
     /// <summary>
     /// Simple FTP server with couple of methods

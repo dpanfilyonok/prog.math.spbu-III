@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using ProtocolSource;
 
-namespace Source
+namespace ServerSource
 {
     /// <summary>
     /// Utils methods for <see cref="SimpleFTPServer"/>

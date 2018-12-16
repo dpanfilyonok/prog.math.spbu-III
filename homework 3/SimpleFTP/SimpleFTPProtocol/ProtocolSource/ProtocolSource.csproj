@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>ProtocolSource</AssemblyName>
     <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>NU1603</NoWarn>
   </PropertyGroup>
