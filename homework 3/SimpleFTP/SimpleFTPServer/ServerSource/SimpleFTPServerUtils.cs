@@ -9,14 +9,14 @@ namespace ServerSource
     /// <summary>
     /// Utils methods for <see cref="SimpleFTPServer"/>
     /// </summary>
-    internal static class SimpleFTPServerUtils
+    public static class SimpleFTPServerUtils
     {
         /// <summary>
         /// Parse request in format "int string" to pair of request method and path
         /// </summary>
         /// <exception cref="ArgumentNullException">'request' is null</exception>
         /// <returns>(request method, path)</returns>
-        internal static (Methods, string) ParseRequest(string request)
+        public static (Methods, string) ParseRequest(string request)
         {
             if (request == null)
             {
@@ -32,11 +32,11 @@ namespace ServerSource
         /// </summary>
         /// <param name="pathToDir">Path to diectory</param>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        internal static List<(string, bool)> GetListOfElementsInDir(string pathToDir)
+        public static List<(string, bool)> GetListOfElementsInDir(string pathToDir)
         {
             if (!Directory.Exists(pathToDir))
             {
-                throw new DirectoryNotFoundException(pathToDir);
+                throw new DirectoryNotFoundException(new DirectoryInfo("./").FullName + pathToDir);
             }
 
             var root = new DirectoryInfo(pathToDir);
@@ -61,7 +61,7 @@ namespace ServerSource
         /// Create response string from list of (string, bool)
         /// </summary>
         /// <returns>Response string for List method</returns>
-        internal static string CreateResponseOfListMethod(List<(string, bool)> content)
+        public static string CreateResponseOfListMethod(List<(string, bool)> content)
         {
             var response = new StringBuilder();
             response.Append(content.Count);
@@ -82,7 +82,7 @@ namespace ServerSource
         /// <param name="pathToFile">File for reading</param>
         /// <exception cref="FileNotFoundException"></exception>
         /// <returns>File stream</returns>
-        internal static FileStream GetReadableFileStream(string pathToFile)
+        public static FileStream GetReadableFileStream(string pathToFile)
         {
             if (!File.Exists(pathToFile))
             {

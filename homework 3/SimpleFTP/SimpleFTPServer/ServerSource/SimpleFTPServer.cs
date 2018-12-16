@@ -32,6 +32,11 @@ namespace ServerSource
 
         public SimpleFTPServer(string address, int port = 2121)
         {
+            if (port < UInt16.MinValue || port > UInt16.MaxValue)
+            {
+                throw new FormatException("Invalid port number");
+            }
+
             Port = port;
             Address = address;
             _tcpServer = new TcpListener(IPAddress.Parse(address), port);

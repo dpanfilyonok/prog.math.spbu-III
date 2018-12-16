@@ -39,12 +39,12 @@ namespace ClientSource
         {
             if (!IPAddress.TryParse(hostIp, out IPAddress ip))
             {
-                throw new ArgumentException($"{nameof(hostIp)} is invalid");
+                throw new FormatException($"{nameof(hostIp)} is invalid");
             }
 
             if (hostPort < UInt16.MinValue || hostPort > UInt16.MaxValue)
             {
-                throw new ArgumentException($"{nameof(hostPort)} is invalid");
+                throw new FormatException($"{nameof(hostPort)} is invalid");
             }
 
             return new IPEndPoint(ip, hostPort);
