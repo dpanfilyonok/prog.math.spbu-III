@@ -32,14 +32,20 @@ namespace ServerSource
 
         public SimpleFTPServer(string address, int port = 2121)
         {
-            if (port < UInt16.MinValue || port > UInt16.MaxValue)
+            IPAddress ip;
+            if (!IPAddress.TryParse(address, out ip))
+            {
+                ip = Dns.GetHostEntry(address).AddressList[0];
+            }
+
+            if (port <= UInt16.MinValue || port > UInt16.MaxValue)
             {
                 throw new FormatException("Invalid port number");
             }
 
             Port = port;
             Address = address;
-            _tcpServer = new TcpListener(IPAddress.Parse(address), port);
+            _tcpServer = new TcpListener(ip, port);
             _cts = new CancellationTokenSource();
             _amountOfActualConnections = 0;
             _lackOfActualConnectionsEvent = new ManualResetEvent(true);
@@ -143,7 +149,6 @@ namespace ServerSource
                                 await writer.WriteAsync(fstream.Length.ToString() + ' ');
                                 await fstream.CopyToAsync(writer.BaseStream);
                             }
-
                         }
                         catch (FileNotFoundException)
                         {

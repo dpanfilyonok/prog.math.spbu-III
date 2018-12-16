@@ -6,18 +6,27 @@ using ServerSource;
 
 namespace ServerTests
 {
+    /// <summary>
+    /// Тесты, проверяющие корректность создания сервера
+    /// </summary>
     [TestClass]
-    public class ServerTests
+    public class ServerCreatingTests
     {
         private SimpleFTPServer _server;
         private const string _ip = "127.0.0.1";
 
+        /// <summary>
+        /// Проверяет возможность запустить сервер на localhost
+        /// </summary>
         [TestMethod]
         public void ServerOnLocalHostShouldWork()
         {
             _server = new SimpleFTPServer("localhost");
         }
 
+        /// <summary>
+        /// 0 порт зарезервирован и запрещен для прослушивания
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(FormatException))]
         public void TryingToUsePort0ShouldRaiseInvalidFormatException()
@@ -25,29 +34,14 @@ namespace ServerTests
             _server = new SimpleFTPServer(_ip, 0);
         }
 
+        /// <summary>
+        /// Номер порта должен быть меньше 65535
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(FormatException))]
         public void TryingToUseBigPortShouldRaiseInvalidFormatException()
         {
             _server = new SimpleFTPServer(_ip, 65535 + 1);
-        }
-
-        [TestMethod]
-        public void GetListOfElementsInDirShouldReturnCorrectData()
-        {
-            var expected = new HashSet<(string, bool)>()
-            {
-                ("NestedFolder1", true),
-                ("NestedFolder2", true),
-                ("1", false),
-                ("2", false),
-                ("3", false)
-            };
-            
-            var data = SimpleFTPServerUtils.GetListOfElementsInDir(@"../../../TestFolder");
-            var actual = new HashSet<(string, bool)>(data);
-
-            Assert.IsTrue(expected.IsSubsetOf(actual) && actual.IsSubsetOf(expected));
         }
     }
 }

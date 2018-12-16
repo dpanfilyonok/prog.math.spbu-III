@@ -32,7 +32,7 @@ namespace ClientSource
                     }
                 case "--get":
                     {
-                        await client.GetFileAsync(ip, port, pathToFile, @"/home/anticnvm/2.png");
+                        await client.DownloadFileAsync(ip, port, pathToFile, @"/home/anticnvm/2.png");
                         Console.WriteLine("LUL");
                         break;
                     }
