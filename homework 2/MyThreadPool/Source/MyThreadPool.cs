@@ -18,6 +18,7 @@
         /// Avaliable threads
         /// </summary>
         private readonly Thread[] _threads;
+        private readonly ManualResetEvent[] _threadsAbortingWaitHandles;
 
         /// <summary>
         /// Queue with tasks for execution
@@ -40,11 +41,17 @@
             _newTaskSheduled = new AutoResetEvent(false);
             _tasksQueue = new ConcurrentQueue<Action>();
             _interruptPoolCancellationTokenSource = new CancellationTokenSource();
-            _threads = new Thread[_maxAmountOfThreads];
-
+            _threadsAbortingWaitHandles = new ManualResetEvent[_maxAmountOfThreads];
             for (int i = 0; i < _maxAmountOfThreads; ++i)
             {
-                _threads[i] = new Thread(TryToExecuteTasks)
+                _threadsAbortingWaitHandles[i] = new ManualResetEvent(false);
+            }
+
+            _threads = new Thread[_maxAmountOfThreads];
+            for (int i = 0; i < _maxAmountOfThreads; ++i)
+            {
+                var local = i;
+                _threads[i] = new Thread(() => TryToExecuteTasks(_threadsAbortingWaitHandles[local]))
                 {
                     IsBackground = true,
                     Name = $"Thread {i}"
@@ -54,7 +61,7 @@
             }
         }
 
-        private void TryToExecuteTasks()
+        private void TryToExecuteTasks(ManualResetEvent threadAbortingWaitHandle)
         {
             while (true)
             {
@@ -71,6 +78,8 @@
                     _newTaskSheduled.WaitOne();
                 }
             }
+
+            threadAbortingWaitHandle.Set();
         }
 
         /// <summary>
@@ -103,7 +112,7 @@
         public void Shutdown()
         {
             _interruptPoolCancellationTokenSource.Cancel();
-            
+            WaitHandle.WaitAll(_threadsAbortingWaitHandles);
         }
 
         /// <summary>
