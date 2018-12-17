@@ -1,0 +1,19 @@
+language: csharp
+solution: ./homework\ 2/MyThreadPool/MyThreadPool.sln
+
+git:
+  depth: 1
+
+mono: none
+dotnet: 2.1
+
+branches:
+  only:
+    - hw_2/MyThreadPool
+  
+matrix:
+  include:
+    - script:
+      - cd ./homework\ 2/MyThreadPool && dotnet restore && dotnet build
+    - script:
+      - dotnet test ./homework\ 1/MyThreadPool/Tests/

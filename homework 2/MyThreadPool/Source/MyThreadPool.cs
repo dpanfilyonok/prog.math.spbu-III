@@ -3,7 +3,7 @@
     using System;
     using System.Threading;
     using System.Collections.Concurrent;
-    
+
     /// <summary>
     /// My thread pool implementation with fixed thread count
     /// </summary>
@@ -12,7 +12,7 @@
         /// <summary>
         /// Max avaliable thread count
         /// </summary>
-        private readonly int _amountOfThreads;
+        private readonly int _maxAmountOfThreads;
 
         /// <summary>
         /// Avaliable threads
@@ -36,15 +36,16 @@
 
         public MyThreadPool(int amountOfThreads)
         {
-            _amountOfThreads = amountOfThreads;
+            _maxAmountOfThreads = amountOfThreads;
             _newTaskSheduled = new AutoResetEvent(false);
             _tasksQueue = new ConcurrentQueue<Action>();
             _interruptPoolCancellationTokenSource = new CancellationTokenSource();
-            _threads = new Thread[_amountOfThreads];
+            _threads = new Thread[_maxAmountOfThreads];
 
-            for (int i = 0; i < _amountOfThreads; ++i)
+            for (int i = 0; i < _maxAmountOfThreads; ++i)
             {
-                _threads[i] = new Thread(TryToExecuteTasks) {
+                _threads[i] = new Thread(TryToExecuteTasks)
+                {
                     IsBackground = true,
                     Name = $"Thread {i}"
                 };
@@ -100,5 +101,74 @@
         /// but new tasks and tasks from the queue are not accepted for execution by threads from the pool
         /// </summary>
         public void Shutdown() => _interruptPoolCancellationTokenSource.Cancel();
+
+        /// <summary>
+        /// My task implementation for <see cref="MyThreadPool"/>
+        /// </summary>
+        /// <typeparam name="TResult">Type of task result</typeparam>
+        private class MyTask<TResult> : IMyTask<TResult>
+        {
+            private readonly Func<TResult> _supplier;
+            private readonly MyThreadPool _parentThreadPool;
+            private readonly ManualResetEvent _executionFinishedEvent;
+            private Exception _executionException;
+
+            public MyTask(Func<TResult> task, MyThreadPool parentThreadPool)
+            {
+                _supplier = task;
+                _parentThreadPool = parentThreadPool;
+                _executionFinishedEvent = new ManualResetEvent(false);
+            }
+
+            public TResult Result
+            {
+                get
+                {   // _executionFinishedEvent.Reset() не нужен тк Result уже вычислен
+                    // и есть кто-то ещё захочет получить доступ к результату таска,
+                    // он не заблокирует себе навечно поток ожиданием завершения исполнения
+                    _executionFinishedEvent.WaitOne();
+                    if (_executionException != null)
+                    {
+                        throw new AggregateException(_executionException);
+                    }
+
+                    return Result;
+                }
+
+                private set { }
+            }
+            
+            public bool IsCompleted { get; private set; }
+
+            public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> supplier)
+            {
+                try
+                {
+                    var newTask = _parentThreadPool.SheduleTask<TNewResult>(
+                        () => supplier(Result)
+                    );
+
+                    return newTask;
+                }
+                catch (InvalidOperationException)
+                {
+                    throw;
+                }
+            }
+
+            public void ExecuteTaskManually()
+            {
+                try
+                {
+                    Result = _supplier.Invoke();
+                    IsCompleted = true;
+                    _executionFinishedEvent.Set();
+                }
+                catch (Exception e)
+                {
+                    _executionException = e;
+                }
+            }
+        }
     }
 }
