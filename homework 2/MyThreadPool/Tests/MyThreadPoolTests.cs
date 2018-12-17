@@ -12,7 +12,7 @@ namespace Tests
     public class MyThreadPoolTests
     {
         private MyThreadPool _pool;
-        private const int _threadCount = 8;
+        private const int _threadCount = 2;
 
         [TestInitialize]
         public void Init()
@@ -164,12 +164,10 @@ namespace Tests
                 return 2;
             });
 
-            task.ContinueWith(i => i * 1)
+            var result = task.ContinueWith(i => i * 1)
                 .ContinueWith(i => i * 10)
                 .ContinueWith(i => i / (i - i))
-                .ContinueWith(i => i * 1000);
-
-            var result = task.Result;
+                .ContinueWith(i => i * 1000).Result;
         }
 
         /// <summary>
@@ -179,31 +177,34 @@ namespace Tests
         [TestMethod]
         public void ExceptionInSequenceOfContinueBehaviorCheck()
         {
-
             var a = 0;
-            _pool.SheduleTask(() =>
+            try
             {
-                a++;
-                return 0;
-            }).ContinueWith(i =>
-            {
-                a++;
-                return 0;
-            }).ContinueWith(i =>
-            {
-                a++;
-                return 0;
-            })
-            .ContinueWith(i =>
-            {
-                a++;
-                return 1 / i;
-            })
-            .ContinueWith(i =>
-            {
-                a++;
-                return 0;
-            });
+                var result = _pool.SheduleTask(() =>
+                {
+                    a++;
+                    return 0;
+                }).ContinueWith(i =>
+                {
+                    a++;
+                    return 0;
+                }).ContinueWith(i =>
+                {
+                    a++;
+                    return 0;
+                })
+                .ContinueWith(i =>
+                {
+                    a++;
+                    return 1 / i;
+                })
+                .ContinueWith(i =>
+                {
+                    a++;
+                    return 0;
+                }).Result;
+            }
+            catch (Exception) { }
 
             Assert.AreEqual(3, a);
         }

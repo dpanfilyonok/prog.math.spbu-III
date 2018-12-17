@@ -100,7 +100,11 @@
         /// Interrupt thread pool: already running tasks are not interrupted, 
         /// but new tasks and tasks from the queue are not accepted for execution by threads from the pool
         /// </summary>
-        public void Shutdown() => _interruptPoolCancellationTokenSource.Cancel();
+        public void Shutdown()
+        {
+            _interruptPoolCancellationTokenSource.Cancel();
+            
+        }
 
         /// <summary>
         /// My task implementation for <see cref="MyThreadPool"/>
@@ -112,14 +116,7 @@
             private readonly MyThreadPool _parentThreadPool;
             private readonly ManualResetEvent _executionFinishedEvent;
             private Exception _executionException;
-
-            public MyTask(Func<TResult> task, MyThreadPool parentThreadPool)
-            {
-                _supplier = task;
-                _parentThreadPool = parentThreadPool;
-                _executionFinishedEvent = new ManualResetEvent(false);
-            }
-
+            public bool IsCompleted { get; private set; } = false;
             public TResult Result
             {
                 get
@@ -137,8 +134,13 @@
 
                 private set { }
             }
-            
-            public bool IsCompleted { get; private set; }
+
+            public MyTask(Func<TResult> task, MyThreadPool parentThreadPool)
+            {
+                _supplier = task;
+                _parentThreadPool = parentThreadPool;
+                _executionFinishedEvent = new ManualResetEvent(false);
+            }
 
             public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> supplier)
             {
@@ -161,13 +163,14 @@
                 try
                 {
                     Result = _supplier.Invoke();
-                    IsCompleted = true;
-                    _executionFinishedEvent.Set();
                 }
                 catch (Exception e)
                 {
                     _executionException = e;
                 }
+
+                IsCompleted = true;
+                _executionFinishedEvent.Set();
             }
         }
     }
