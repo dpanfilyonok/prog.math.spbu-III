@@ -16,4 +16,4 @@ matrix:
     - script:
       - cd ./homework\ 2/MyThreadPool && dotnet restore && dotnet build
     - script:
-      - dotnet test ./homework\ 1/MyThreadPool/Tests/
+      - dotnet test ./homework\ 2/MyThreadPool/Tests/
