@@ -21,25 +21,19 @@ namespace ClientSource
         /// <returns>Request string</returns>
         internal static string FormRequest(Methods method, string path)
         {
-            var sBuilder = new StringBuilder();
-            sBuilder.Append((int)method);
-            sBuilder.Append(' ');
-            sBuilder.Append(path);
-
-            return sBuilder.ToString();
+            return $"{method} {path}";
         }
 
         /// <summary>
         /// Convert string IP and int port to IPEndPoint object
         /// </summary>
-        /// <param name="hostIp"></param>
-        /// <param name="hostPort"></param>
-        /// <returns></returns>
+        /// <param name="hostIp">Converted ip</param>
+        /// <param name="hostPort">Converted port</param>
         internal static IPEndPoint ConvertToEndPoint(string hostIp, int hostPort)
         {
             if (!IPAddress.TryParse(hostIp, out IPAddress ip))
             {
-                throw new FormatException($"{nameof(hostIp)} is invalid");
+                ip = Dns.GetHostEntry(hostIp).AddressList[0];
             }
 
             if (hostPort < UInt16.MinValue || hostPort > UInt16.MaxValue)
@@ -53,8 +47,8 @@ namespace ClientSource
         /// <summary>
         /// Parses string response from list method to list of (string, bool)
         /// </summary>
-        /// <exception cref="DirectoryNotFoundException"></exception>
-        /// <exception cref="InvalidResponseFormatException"></exception>
+        /// <exception cref="DirectoryNotFoundException">If response == -1</exception>
+        /// <exception cref="InvalidResponseFormatException">If response has invalid format</exception>
         internal static List<(string, bool)> ParseListResponse(string content)
         {
             var splited = content.Trim().Split('&');
@@ -74,7 +68,7 @@ namespace ClientSource
 
             var listOfContent = new List<(string, bool)>();
 
-            Func<string, bool> convertToBool = (flag) =>
+            bool convertToBool(string flag)
             {
                 if (!Boolean.TryParse(flag, out bool result))
                 {
@@ -88,9 +82,9 @@ namespace ClientSource
                 return result;
             };
 
-            for (int i = 1; i < size * 2 + 1; ++i)
+            for (int i = 1; i < size * 2 + 1; i += 2)
             {
-                listOfContent.Add((splited[i++], convertToBool(splited[i])));
+                listOfContent.Add((splited[i], convertToBool(splited[i + 1])));
             }
 
             return listOfContent;

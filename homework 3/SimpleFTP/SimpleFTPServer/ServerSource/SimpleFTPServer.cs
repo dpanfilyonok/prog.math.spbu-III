@@ -57,13 +57,13 @@ namespace ServerSource
         /// <summary>
         /// Start listening mentioned port and execute requests.
         /// </summary>
-        public void Start()
+        public async void RunAsync()
         {
             Console.WriteLine($"Server started, listening port {Port} ...");
             while (!_cts.IsCancellationRequested)
             {
                 Console.WriteLine("Waiting for a connections...");
-                var client = _tcpServer.AcceptTcpClient();
+                var client = await _tcpServer.AcceptTcpClientAsync();
 
                 Console.WriteLine($"Client on {client.Client.RemoteEndPoint} connected. Executing request async...");
                 lock (_lockObject)
@@ -81,7 +81,7 @@ namespace ServerSource
         private async void ServeRequestAsync(TcpClient client)
         {
             try
-            {
+            {   // ??
                 await Task.Run(async () =>
                 {
                     var clientEP = client.Client.RemoteEndPoint.ToString();

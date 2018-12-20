@@ -7,16 +7,11 @@ using ProtocolSource;
 
 namespace ClientSource
 {
-    using ListResponseType = Task<List<(string, bool)>>;
-    using GetByteArrayResponseType = Task<byte[]>;
-    using DownloadFileResponseType = Task;
-
     /// <summary>
     /// Class, that provides SimpleFTP methods 
     /// </summary>
     public class SimpleFTPClient
     {
-        #region ListAsync
         /// <summary>
         /// Returns content of directory on server
         /// </summary>
@@ -25,7 +20,7 @@ namespace ClientSource
         /// <param name="path">Path to dir</param>
         /// <exception cref="SocketException"></exception>
         /// <returns>List of content</returns>
-        public async ListResponseType ListAsync(string hostIp, int hostPort, string path)
+        public async Task<List<(string, bool)>> ListAsync(string hostIp, int hostPort, string path)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
             return await ListAsync(host, path);
@@ -38,7 +33,7 @@ namespace ClientSource
         /// <param name="path">Path to dir</param>
         /// <exception cref="SocketException"></exception>
         /// <returns>List of content</returns>
-        public async ListResponseType ListAsync(IPEndPoint host, string path)
+        public async Task<List<(string, bool)>> ListAsync(IPEndPoint host, string path)
         {
             var request = SimpleFTPClientUtils.FormRequest(Methods.List, path);
             var response = "";
@@ -67,9 +62,6 @@ namespace ClientSource
             return SimpleFTPClientUtils.ParseListResponse(response);
         }
 
-        #endregion
-
-        #region GetByteArrayAsync
         /// <summary>
         /// Returns content of file on server as byte array
         /// </summary>
@@ -78,7 +70,7 @@ namespace ClientSource
         /// <param name="path">Path to file</param>
         /// <exception cref="SocketException"></exception>
         /// <returns>File content as byte array</returns>
-        public async GetByteArrayResponseType GetByteArrayAsync(string hostIp, int hostPort, string path)
+        public async Task<byte[]> GetByteArrayAsync(string hostIp, int hostPort, string path)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
             return await GetByteArrayAsync(host, path);
@@ -91,7 +83,7 @@ namespace ClientSource
         /// <param name="path">Path to file</param>
         /// <exception cref="SocketException"></exception>
         /// <returns>File content as byte array</returns>
-        public async GetByteArrayResponseType GetByteArrayAsync(IPEndPoint host, string path)
+        public async Task<byte[]> GetByteArrayAsync(IPEndPoint host, string path)
         {
             var request = SimpleFTPClientUtils.FormRequest(Methods.Get, path);
             byte[] response;
@@ -126,9 +118,6 @@ namespace ClientSource
             return response;
         }
 
-        #endregion
-
-        #region DownloadFileAsync
         /// <summary>
         /// Download file from remote server
         /// </summary>
@@ -137,7 +126,7 @@ namespace ClientSource
         /// <param name="path">Path to file on server</param>
         /// <param name="pathToSave">Path where to download file</param>
         /// <exception cref="SocketException"></exception>
-        public async DownloadFileResponseType DownloadFileAsync(string hostIp, int hostPort, string path, string pathToSave)
+        public async Task DownloadFileAsync(string hostIp, int hostPort, string path, string pathToSave)
         {
             var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
             await DownloadFileAsync(host, path, pathToSave);
@@ -150,20 +139,12 @@ namespace ClientSource
         /// <param name="path">Path to file server</param>
         /// <param name="pathToSave">Path where to download file</param>
         /// <exception cref="SocketException"></exception>
-        public async DownloadFileResponseType DownloadFileAsync(IPEndPoint host, string path, string pathToSave)
+        public async Task DownloadFileAsync(IPEndPoint host, string path, string pathToSave)
         {
             var request = SimpleFTPClientUtils.FormRequest(Methods.Get, path);
             using (var client = new TcpClient())
             {
-                try
-                {
-                    client.Connect(host);
-                }
-                catch (SocketException)
-                {
-                    throw;
-                }
-
+                client.Connect(host);
                 using (var stream = client.GetStream())
                 {
                     var writer = new StreamWriter(stream) { AutoFlush = true };
@@ -184,7 +165,5 @@ namespace ClientSource
                 }
             }
         }
-
-        #endregion
     }
 }

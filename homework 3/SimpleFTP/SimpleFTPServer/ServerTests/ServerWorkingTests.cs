@@ -13,27 +13,23 @@ namespace ServerTests
     public class ServerWorkingTests
     {
         private SimpleFTPServer _server;
-        private Thread _serverThread;
-        private const string _ip = "127.0.0.1";
+        private const string _ip = "localhost";
         private const int _port = 2121;
 
         [TestInitialize]
         public void Init()
         {
-            _serverThread = new Thread(() =>
+            Task.Run(() =>
             {
                 _server = new SimpleFTPServer(_ip, _port);
-                _server.Start();
+                _server.RunAsync();
             });
-
-            _serverThread.Start();
         }
 
         [TestCleanup]
         public void Cleanup()
         {
             _server.Stop();
-            _serverThread.Join();
         }
 
         [TestMethod]

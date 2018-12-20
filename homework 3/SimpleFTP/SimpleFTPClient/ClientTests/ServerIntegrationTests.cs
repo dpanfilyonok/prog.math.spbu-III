@@ -16,28 +16,24 @@ namespace ClientTests
     {
         private SimpleFTPClient _client;
         private SimpleFTPServer _server;
-        private Thread _serverThread;
-        private const string _ip = "127.0.0.1";
+        private const string _ip = "localhost";
         private const int _port = 2121;
 
         [TestInitialize]
         public void Init()
         {
             _client = new SimpleFTPClient();
-            _serverThread = new Thread(() =>
+            Task.Run(() =>
             {
                 _server = new SimpleFTPServer(_ip, _port);
-                _server.Start();
+                _server.RunAsync();
             });
-
-            _serverThread.Start();
         }
 
         [TestCleanup]
         public void Cleanup()
         {
             _server.Stop();
-            _serverThread.Abort();
         }
 
         /// <summary>
@@ -149,13 +145,13 @@ namespace ClientTests
         public async Task ServerStressTest()
         {
             var expectedLength = 1000;
-            var listOfResponces = new List<List<(string, bool)>>();
+            var listOfResponses = new List<List<(string, bool)>>();
             for (int i = 0; i < expectedLength; ++i)
             {
-                listOfResponces.Add(await _client.ListAsync(_ip, _port, @"../../../TestFolder"));
+                listOfResponses.Add(await _client.ListAsync(_ip, _port, @"../../../TestFolder"));
             }
 
-            Assert.AreEqual(expectedLength, listOfResponces.Count);
+            Assert.AreEqual(expectedLength, listOfResponses.Count);
         }
     }
 }
