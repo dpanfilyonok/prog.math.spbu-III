@@ -33,7 +33,7 @@ namespace ClientTests
         [TestCleanup]
         public void Cleanup()
         {
-            _server.Stop();
+           // _server.Stop();
         }
 
         /// <summary>

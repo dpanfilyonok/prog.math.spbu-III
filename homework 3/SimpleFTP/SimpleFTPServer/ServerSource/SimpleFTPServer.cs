@@ -38,7 +38,7 @@ namespace ServerSource
                 ip = Dns.GetHostEntry(address).AddressList[0];
             }
 
-            if (port <= UInt16.MinValue || port > UInt16.MaxValue)
+            if (port < IPEndPoint.MinPort || port > IPEndPoint.MaxPort)
             {
                 throw new FormatException("Invalid port number");
             }
