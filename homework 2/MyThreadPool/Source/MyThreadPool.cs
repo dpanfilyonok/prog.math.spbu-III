@@ -18,17 +18,11 @@
         /// Avaliable threads
         /// </summary>
         private readonly Thread[] _threads;
-        private readonly ManualResetEvent[] _threadsAbortingWaitHandles;
 
         /// <summary>
         /// Queue with tasks for execution
         /// </summary>
-        private readonly ConcurrentQueue<Action> _tasksQueue;
-
-        /// <summary>
-        /// Event, rising when new task was shedulded
-        /// </summary>
-        private readonly AutoResetEvent _newTaskSheduled;
+        private BlockingCollection<Action> _tasksQueue;
 
         /// <summary>
         /// Cancellation token for shutdown thread pool
@@ -38,20 +32,14 @@
         public MyThreadPool(int amountOfThreads)
         {
             _maxAmountOfThreads = amountOfThreads;
-            _newTaskSheduled = new AutoResetEvent(false);
-            _tasksQueue = new ConcurrentQueue<Action>();
+            _tasksQueue = new BlockingCollection<Action>();
             _interruptPoolCancellationTokenSource = new CancellationTokenSource();
-            _threadsAbortingWaitHandles = new ManualResetEvent[_maxAmountOfThreads];
-            for (int i = 0; i < _maxAmountOfThreads; ++i)
-            {
-                _threadsAbortingWaitHandles[i] = new ManualResetEvent(false);
-            }
 
             _threads = new Thread[_maxAmountOfThreads];
             for (int i = 0; i < _maxAmountOfThreads; ++i)
             {
                 var local = i;
-                _threads[i] = new Thread(() => TryToExecuteTasks(_threadsAbortingWaitHandles[local]))
+                _threads[i] = new Thread(() => TryToExecuteTasks())
                 {
                     IsBackground = true,
                     Name = $"Thread {i}"
@@ -61,25 +49,21 @@
             }
         }
 
-        private void TryToExecuteTasks(ManualResetEvent threadAbortingWaitHandle)
+        private void TryToExecuteTasks()
         {
             while (true)
             {
-                if (_tasksQueue.TryDequeue(out Action task))
-                {
-                    task.Invoke();
-                }
-                else if (_interruptPoolCancellationTokenSource.IsCancellationRequested)
+                if (_interruptPoolCancellationTokenSource.IsCancellationRequested)
                 {
                     break;
                 }
-                else
-                {
-                    _newTaskSheduled.WaitOne();
-                }
-            }
 
-            threadAbortingWaitHandle.Set();
+                try
+                {
+                    _tasksQueue?.Take(_interruptPoolCancellationTokenSource.Token).Invoke();
+                }
+                catch (OperationCanceledException) { }
+            }
         }
 
         /// <summary>
@@ -99,8 +83,18 @@
             }
 
             var task = new MyTask<TResult>(supplier, this);
-            _tasksQueue.Enqueue(task.ExecuteTaskManually);
-            _newTaskSheduled.Set();
+            try
+            {
+                _tasksQueue.Add(task.ExecuteTaskManually, _interruptPoolCancellationTokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new InvalidOperationException();
+            }
+            catch (NullReferenceException)
+            {
+                throw new InvalidOperationException();
+            }
 
             return task;
         }
@@ -112,7 +106,8 @@
         public void Shutdown()
         {
             _interruptPoolCancellationTokenSource.Cancel();
-            WaitHandle.WaitAll(_threadsAbortingWaitHandles);
+            _tasksQueue?.CompleteAdding();
+            _tasksQueue = null;
         }
 
         /// <summary>
@@ -125,6 +120,8 @@
             private readonly MyThreadPool _parentThreadPool;
             private readonly ManualResetEvent _executionFinishedEvent;
             private Exception _executionException;
+            private TResult _result;
+
             public bool IsCompleted { get; private set; } = false;
             public TResult Result
             {
@@ -138,10 +135,10 @@
                         throw new AggregateException(_executionException);
                     }
 
-                    return Result;
+                    return _result;
                 }
 
-                private set { }
+                private set => _result = value;
             }
 
             public MyTask(Func<TResult> task, MyThreadPool parentThreadPool)
@@ -152,20 +149,9 @@
             }
 
             public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> supplier)
-            {
-                try
-                {
-                    var newTask = _parentThreadPool.SheduleTask<TNewResult>(
-                        () => supplier(Result)
-                    );
-
-                    return newTask;
-                }
-                catch (InvalidOperationException)
-                {
-                    throw;
-                }
-            }
+                => _parentThreadPool.SheduleTask<TNewResult>(
+                    () => supplier(Result)
+                );
 
             public void ExecuteTaskManually()
             {

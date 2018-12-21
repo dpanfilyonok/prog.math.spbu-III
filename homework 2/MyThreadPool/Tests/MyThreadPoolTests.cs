@@ -142,12 +142,12 @@ namespace Tests
                 return 2;
             });
 
-            task.ContinueWith(i => i * 1)
+            var newTask = task.ContinueWith(i => i * 1)
                 .ContinueWith(i => i * 10)
                 .ContinueWith(i => i * 100)
                 .ContinueWith(i => i * 1000);
 
-            Assert.AreEqual(2000000, task.Result);
+            Assert.AreEqual(2000000, newTask.Result);
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace Tests
             }
             catch (Exception) { }
 
-            Assert.AreEqual(3, a);
+            Assert.AreEqual(4, a);
         }
 
         /// <summary>
