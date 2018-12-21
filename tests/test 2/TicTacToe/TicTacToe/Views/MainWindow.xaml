@@ -1,0 +1,32 @@
+﻿<Window x:Class="TicTacToe.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TicTacToe"
+        xmlns:vm="clr-namespace:TicTacToe.ViewModels"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="900">
+
+    <Grid x:Name="Container">
+        <Grid.DataContext>
+            <vm:Board Rows="3" Columns="3"/>
+        </Grid.DataContext>
+        <ItemsControl x:Name="Board" ItemsSource="{Binding Path=Cells}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate >
+                    <UniformGrid Rows="{Binding Path=Rows}" Columns="{Binding Path=Columns}"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Content="{Binding Path=Sign}" 
+                        IsEnabled="{Binding Path=CanSelect}"
+                        Click="CellClick"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+
+</Window>

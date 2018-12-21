@@ -1,6 +1,7 @@
 language: csharp
 solution: ./homework\ 2/MyThreadPool/MyThreadPool.sln
 
+
 git:
   depth: 1
 
