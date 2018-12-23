@@ -44,7 +44,7 @@ namespace ClientTests
         [ExpectedException(typeof(DirectoryNotFoundException))]
         public async Task TryingToMakeRequestToNonexistentFolderShouldRaiseException()
         {
-            await _client.ListAsync(_ip, _port, "../../../TestFolderNonexistent");
+            await _client.ListAsync(_ip, _port, "../ServerTests/TestFolderNonexistent");
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace ClientTests
         [ExpectedException(typeof(FileNotFoundException))]
         public async Task TryingToDownloadNonexistentFileShouldRaiseException()
         {
-            await _client.DownloadFileAsync(_ip, _port, "../../../TestFolder/nonexistent", ".");
+            await _client.DownloadFileAsync(_ip, _port, "../ServerTests/TestFolder/nonexistent", ".");
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace ClientTests
                 ("3", false)
             };
 
-            var response = await _client.ListAsync(_ip, _port, @"../../../TestFolder");
+            var response = await _client.ListAsync(_ip, _port, @"../ServerTests/TestFolder");
             var actual = new HashSet<(string, bool)>(response);
 
             Assert.IsTrue(expected.IsSubsetOf(actual) && actual.IsSubsetOf(expected));
@@ -91,7 +91,7 @@ namespace ClientTests
             await _client.DownloadFileAsync(
                 _ip,
                 _port,
-                "../../../TestFolder/NestedFolder1/img.jpg",
+                "../ServerTests/TestFolder/NestedFolder1/img.jpg",
                 destinationPath);
             Assert.IsTrue(File.Exists(destinationPath));
             File.Delete(destinationPath);
@@ -110,12 +110,12 @@ namespace ClientTests
             var t1 = _client.DownloadFileAsync(
                 _ip,
                 _port,
-                "../../../TestFolder/NestedFolder1/img.jpg",
+                "../ServerTests/TestFolder/NestedFolder1/img.jpg",
                 destinationPath1);
             var t2 = _client.DownloadFileAsync(
                 _ip,
                 _port,
-                "../../../TestFolder/NestedFolder1/img.jpg",
+                "../ServerTests/TestFolder/NestedFolder1/img.jpg",
                 destinationPath2);
 
             Task.WaitAll(t1, t2);
@@ -137,7 +137,7 @@ namespace ClientTests
             var listOfResponses = new List<List<(string, bool)>>();
             for (int i = 0; i < expectedLength; ++i)
             {
-                listOfResponses.Add(await _client.ListAsync(_ip, _port, @"../../../TestFolder"));
+                listOfResponses.Add(await _client.ListAsync(_ip, _port, @"../ServerTests/TestFolder"));
             }
 
             Assert.AreEqual(expectedLength, listOfResponses.Count);
