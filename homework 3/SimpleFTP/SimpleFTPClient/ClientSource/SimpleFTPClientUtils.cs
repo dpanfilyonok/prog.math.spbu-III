@@ -21,7 +21,7 @@ namespace ClientSource
         /// <returns>Request string</returns>
         internal static string FormRequest(Methods method, string path)
         {
-            return $"{method} {path}";
+            return $"{(int)method} {path}";
         }
 
         /// <summary>

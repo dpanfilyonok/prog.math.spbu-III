@@ -40,15 +40,7 @@ namespace ClientSource
 
             using (var client = new TcpClient())
             {
-                try
-                {
-                    client.Connect(host);
-                }
-                catch (SocketException)
-                {
-                    throw;
-                }
-
+                client.Connect(host);
                 using (var stream = client.GetStream())
                 {
                     var writer = new StreamWriter(stream) { AutoFlush = true };
@@ -90,15 +82,7 @@ namespace ClientSource
 
             using (var client = new TcpClient())
             {
-                try
-                {
-                    client.Connect(host);
-                }
-                catch (SocketException)
-                {
-                    throw;
-                }
-
+                client.Connect(host);
                 using (var stream = client.GetStream())
                 {
                     var writer = new StreamWriter(stream) { AutoFlush = true };
