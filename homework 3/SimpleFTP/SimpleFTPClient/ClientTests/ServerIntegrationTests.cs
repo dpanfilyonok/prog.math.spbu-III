@@ -59,17 +59,6 @@ namespace ClientTests
         }
 
         /// <summary>
-        /// Попытка получить массив байт несуществующего файла должна вызывать ошибку
-        /// </summary>
-        /// <returns></returns>
-        [TestMethod]
-        [ExpectedException(typeof(FileNotFoundException))]
-        public async Task TryingToGetByteArrayOfNonexistentFileShouldRaiseException()
-        {
-            await _client.GetByteArrayAsync(_ip, _port, "../../../TestFolder/nonexistent");
-        }
-
-        /// <summary>
         /// List должен возвращать список содержимого в папке
         /// </summary>
         /// <returns></returns>

@@ -81,7 +81,7 @@ namespace ServerSource
         private async void ServeRequestAsync(TcpClient client)
         {
             try
-            {   // ??
+            { 
                 await Task.Run(async () =>
                 {
                     var clientEP = client.Client.RemoteEndPoint.ToString();
@@ -146,7 +146,7 @@ namespace ServerSource
                         {
                             using (var fstream = SimpleFTPServerUtils.GetReadableFileStream(request.path))
                             {
-                                await writer.WriteAsync(fstream.Length.ToString() + ' ');
+                                await writer.WriteLineAsync(fstream.Length.ToString());
                                 await fstream.CopyToAsync(writer.BaseStream);
                             }
                         }

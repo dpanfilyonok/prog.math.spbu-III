@@ -24,15 +24,6 @@ namespace ServerTests
             _server = new SimpleFTPServer("localhost");
         }
 
-        /// <summary>
-        /// 0 порт зарезервирован и запрещен для прослушивания
-        /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(FormatException))]
-        public void TryingToUsePort0ShouldRaiseInvalidFormatException()
-        {
-            _server = new SimpleFTPServer(_ip, 0);
-        }
 
         /// <summary>
         /// Номер порта должен быть меньше 65535

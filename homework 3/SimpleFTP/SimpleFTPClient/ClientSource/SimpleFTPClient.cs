@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -55,54 +56,6 @@ namespace ClientSource
         }
 
         /// <summary>
-        /// Returns content of file on server as byte array
-        /// </summary>
-        /// <param name="hostIp">Server remote IP</param>
-        /// <param name="hostPort">Server remote port</param>
-        /// <param name="path">Path to file</param>
-        /// <exception cref="SocketException"></exception>
-        /// <returns>File content as byte array</returns>
-        public async Task<byte[]> GetByteArrayAsync(string hostIp, int hostPort, string path)
-        {
-            var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
-            return await GetByteArrayAsync(host, path);
-        }
-
-        /// <summary>
-        /// Returns content of file on server as byte array
-        /// </summary>
-        /// <param name="host">Remote server address</param>
-        /// <param name="path">Path to file</param>
-        /// <exception cref="SocketException"></exception>
-        /// <returns>File content as byte array</returns>
-        public async Task<byte[]> GetByteArrayAsync(IPEndPoint host, string path)
-        {
-            var request = SimpleFTPClientUtils.FormRequest(Methods.Get, path);
-            byte[] response;
-
-            using (var client = new TcpClient())
-            {
-                client.Connect(host);
-                using (var stream = client.GetStream())
-                {
-                    var writer = new StreamWriter(stream) { AutoFlush = true };
-                    await writer.WriteLineAsync(request);
-
-                    var reader = new BinaryReader(stream);
-                    int size = reader.ReadInt32();
-                    if (size == -1)
-                    {
-                        throw new FileNotFoundException("File don`t exist on server", path);
-                    }
-
-                    response = reader.ReadBytes(size);
-                }
-            }
-
-            return response;
-        }
-
-        /// <summary>
         /// Download file from remote server
         /// </summary>
         /// <param name="hostIp">Server remote IP</param>
@@ -134,8 +87,12 @@ namespace ClientSource
                     var writer = new StreamWriter(stream) { AutoFlush = true };
                     await writer.WriteLineAsync(request);
 
-                    var reader = new BinaryReader(stream);
-                    int size = reader.ReadInt32();
+                    var reader = new StreamReader(stream);
+                    if (!int.TryParse(await reader.ReadLineAsync(), out int size))
+                    {
+                        throw new Exception("LUL");
+                    }
+
                     if (size == -1)
                     {
                         throw new FileNotFoundException("File don`t exist on server", path);
