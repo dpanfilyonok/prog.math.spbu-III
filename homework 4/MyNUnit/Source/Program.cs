@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Source
 {
@@ -6,7 +7,24 @@ namespace Source
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            if (args.Length < 1)
+            {
+                Console.WriteLine("At least 1 argument should be passed");
+                return;
+            }
+
+            var path = args[0];
+            var testLauncher = new TestLauncher();
+            try
+            {
+                testLauncher.LaunchTestingIn(path);
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            testLauncher.PrintResults();
         }
     }
 }

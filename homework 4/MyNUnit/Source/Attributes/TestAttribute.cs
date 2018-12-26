@@ -6,10 +6,10 @@ namespace Source.Attributes
     {
         public string Ignore { get; }
         public Exception ExpectedException { get; }
-        public TestAttribute(Exception expectedException, string ignore)
+        public TestAttribute(Exception expectedException = null, string ignoreReason = null)
         {
             this.ExpectedException = expectedException;
-            this.Ignore = ignore;
+            this.Ignore = ignoreReason;
         }
     }
 }
