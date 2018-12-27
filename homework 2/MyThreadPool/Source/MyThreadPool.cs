@@ -22,7 +22,7 @@
         /// <summary>
         /// Queue with tasks for execution
         /// </summary>
-        private BlockingCollection<Action> _tasksQueue;
+        private BlockingCollection<Action<bool>> _tasksQueue;
 
         /// <summary>
         /// Cancellation token for shutdown thread pool
@@ -32,7 +32,7 @@
         public MyThreadPool(int amountOfThreads)
         {
             _maxAmountOfThreads = amountOfThreads;
-            _tasksQueue = new BlockingCollection<Action>();
+            _tasksQueue = new BlockingCollection<Action<bool>>();
             _interruptPoolCancellationTokenSource = new CancellationTokenSource();
 
             _threads = new Thread[_maxAmountOfThreads];
@@ -60,7 +60,7 @@
 
                 try
                 {
-                    _tasksQueue?.Take(_interruptPoolCancellationTokenSource.Token).Invoke();
+                    _tasksQueue?.Take(_interruptPoolCancellationTokenSource.Token).Invoke(false);
                 }
                 catch (OperationCanceledException) { }
             }
@@ -107,6 +107,11 @@
         {
             _interruptPoolCancellationTokenSource.Cancel();
             _tasksQueue?.CompleteAdding();
+            while (!_tasksQueue.IsCompleted)
+            {
+                _tasksQueue.Take().Invoke(true);
+            }
+
             _tasksQueue = null;
         }
 
@@ -153,15 +158,24 @@
                     () => supplier(Result)
                 );
 
-            public void ExecuteTaskManually()
+            public void ExecuteTaskManually(bool isCancelled = false)
             {
-                try
+                if (!isCancelled)
                 {
-                    Result = _supplier.Invoke();
+                    try
+                    {
+                        Result = _supplier.Invoke();
+                    }
+                    catch (Exception e)
+                    {
+                        _executionException = e;
+                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    _executionException = e;
+                    _executionException = new OperationCanceledException(
+                        "Execution cancelled"
+                    );
                 }
 
                 IsCompleted = true;

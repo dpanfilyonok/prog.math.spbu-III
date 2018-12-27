@@ -20,12 +20,6 @@ namespace Tests
             _pool = new MyThreadPool(_threadCount);
         }
 
-        [TestCleanup]
-        public void Cleanup()
-        {
-            _pool.Shutdown();
-        }
-
         /// <summary>
         /// Ошибка во время вычисления таска не должно крашить программу
         /// </summary>
@@ -74,7 +68,8 @@ namespace Tests
         /// Задачи, находящиейся в пуле потоков, должны завершить свое выполнение и после завершения работы пула
         /// </summary>
         [TestMethod]
-        public void ShutdownedPoolShouldContinueExecuteTasksInIt()
+        [ExpectedException(typeof(AggregateException))]
+        public void ShutdownedPoolShouldNotContinueExecuteTasksInIt()
         {
             var a = 1;
             var task = _pool.SheduleTask(() =>
@@ -90,8 +85,7 @@ namespace Tests
 
             _pool.Shutdown();
 
-            Assert.AreEqual(a, task.Result);
-            Assert.AreEqual(a + a, newTask.Result);
+            var res = newTask.Result;
         }
 
         /// <summary>
