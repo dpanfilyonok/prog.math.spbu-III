@@ -1,0 +1,19 @@
+language: csharp
+solution: ./homework\ 4/MyNUnit/MyNUnit.sln
+
+git:
+  depth: 1
+
+mono: none
+dotnet: 2.1
+
+branches:
+  only:
+    - hw_4/MyNUnit
+  
+matrix:
+  include:
+    - script:
+      - cd ./homework\ 4/MyNUnit && dotnet restore && dotnet build
+    - script:
+      - dotnet test ./homework\ 4/MyNUnit/Tests/
