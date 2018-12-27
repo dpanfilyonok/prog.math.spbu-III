@@ -14,18 +14,25 @@ namespace Source
     public class TestLauncher
     {
         private ConcurrentBag<TestInfo> _executedTestInfos;
-        private AutoResetEvent _testsExecuted;
+        private ManualResetEvent _testsExecuted;
+        private readonly string _pathToTestDir;
 
-        public TestLauncher()
+        public int Succeeded { get; private set; } = 0;
+        public int Failed { get; private set; } = 0;
+        public int Ignored { get; private set; } = 0;
+
+
+        public TestLauncher(string pathToDir)
         {
             _executedTestInfos = new ConcurrentBag<TestInfo>();
-            _testsExecuted = new AutoResetEvent(false);
+            _testsExecuted = new ManualResetEvent(false);
+            _pathToTestDir = pathToDir;
         }
 
-        public void LaunchTestingIn(string pathToDir)
+        public void LaunchTesting()
         {
-            var types = GetAssembliesInDir(pathToDir);
-            var res = Parallel.ForEach(types, RunTests);
+            var types = GetAssembliesInDir(_pathToTestDir);
+            Parallel.ForEach(types, RunTests);
         }
 
         public void PrintResults()
@@ -52,7 +59,7 @@ namespace Source
                     case Results.Ignored:
                         ignored++;
                         Console.WriteLine($"Ignore reason : {testInfo.IgnoreReason}");
-                        break;                        
+                        break;
                 }
 
                 Console.WriteLine('\n');
@@ -73,7 +80,7 @@ namespace Source
 
             var dirInfo = new DirectoryInfo(pathToDir);
             return dirInfo.EnumerateFiles()
-              .Where(fileInfo => fileInfo.Extension == "dll")
+              .Where(fileInfo => fileInfo.Extension == ".dll")
               .Select(fileInfo => Assembly.LoadFrom(fileInfo.FullName))
               .ToHashSet()
               .SelectMany(assembly => assembly.ExportedTypes);
@@ -97,15 +104,15 @@ namespace Source
                     .Select(attr => attr.GetType())
                     .Contains(typeof(T)))
                 .AsParallel()
-                .ForAll(mInfo =>
+                .ForAll(methodInfo =>
                 {
                     if (typeof(T) == typeof(TestAttribute))
                     {
-                        ExecuteTestMethod(mInfo, testClassInstance);
+                        ExecuteTestMethod(methodInfo, testClassInstance);
                     }
                     else
                     {
-                        mInfo.Invoke(testClassInstance, null);
+                        methodInfo.Invoke(testClassInstance, null);
                     }
                 });
         }
@@ -118,6 +125,7 @@ namespace Source
             {
                 testInfo = new TestInfo(mInfo.Name, Results.Ignored, ignoreReason: testAttribute.Ignore);
                 _executedTestInfos.Add(testInfo);
+                Ignored++;
                 return;
             }
 
@@ -140,9 +148,17 @@ namespace Source
             }
 
             stopWatch.Stop();
-            testInfo = new TestInfo(mInfo.Name, succeeded ? Results.Succeeded : Results.Failed, completionTime:stopWatch.ElapsedMilliseconds);
+            testInfo = new TestInfo(mInfo.Name, succeeded ? Results.Succeeded : Results.Failed, completionTime: stopWatch.ElapsedMilliseconds);
+            if (testInfo.Result == Results.Succeeded)
+            {
+                Succeeded++;
+            }
+            else
+            {
+                Failed++;
+            }
+            
             _executedTestInfos.Add(testInfo);
-
             ExecuteAllMethodsWithAttribute<AfterAttribute>(testClass, testClassInstance);
         }
     }

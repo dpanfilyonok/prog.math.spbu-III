@@ -14,10 +14,10 @@ namespace Source
             }
 
             var path = args[0];
-            var testLauncher = new TestLauncher();
+            var testLauncher = new TestLauncher(path);
             try
             {
-                testLauncher.LaunchTestingIn(path);
+                testLauncher.LaunchTesting();
             }
             catch (DirectoryNotFoundException e)
             {

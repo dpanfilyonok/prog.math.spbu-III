@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.2.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Source\Source.csproj" />
+    <ProjectReference Include="..\TestProjects\AfterClassTest\AfterClassTest.csproj" />
+    <ProjectReference Include="..\TestProjects\AfterInstanceTest\AfterInstanceTest.csproj" />
+    <ProjectReference Include="..\TestProjects\BeforeAndAfterTest\BeforeAndAfterTest.csproj" />
+    <ProjectReference Include="..\TestProjects\BeforeClassAndAfterClassTest\BeforeClassAndAfterClassTest.csproj" />
+    <ProjectReference Include="..\TestProjects\BeforeClassTest\BeforeClassTest.csproj" />
+    <ProjectReference Include="..\TestProjects\BeforeInstanceTest\BeforeInstanceTest.csproj" />
+    <ProjectReference Include="..\TestProjects\ExpectedExceptionTest\ExpectedExceptionTest.csproj" />
+    <ProjectReference Include="..\TestProjects\SucceededFailedIgnoredTest\SucceededFailedIgnoredTest.csproj" />
+  </ItemGroup>
+
+</Project>
