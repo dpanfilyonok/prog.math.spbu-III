@@ -11,16 +11,29 @@ using Source.Attributes;
 
 namespace Source
 {
+    /// <summary>
+    /// Class which launch test on mentioned directory
+    /// </summary>
     public class TestLauncher
     {
         private ConcurrentBag<TestInfo> _executedTestInfos;
         private ManualResetEvent _testsExecuted;
         private readonly string _pathToTestDir;
 
+        /// <summary>
+        /// Amount of succeeded tests
+        /// </summary>
         public int Succeeded { get; private set; } = 0;
-        public int Failed { get; private set; } = 0;
-        public int Ignored { get; private set; } = 0;
 
+        /// <summary>
+        /// Amount of failed tests
+        /// </summary>
+        public int Failed { get; private set; } = 0;
+
+        /// <summary>
+        /// Amount of ignored tests
+        /// </summary>
+        public int Ignored { get; private set; } = 0;
 
         public TestLauncher(string pathToDir)
         {
@@ -29,12 +42,19 @@ namespace Source
             _pathToTestDir = pathToDir;
         }
 
+        /// <summary>
+        /// Launch testing
+        /// </summary>
         public void LaunchTesting()
         {
             var types = GetAssembliesInDir(_pathToTestDir);
             Parallel.ForEach(types, RunTests);
+            _testsExecuted.Set();
         }
 
+        /// <summary>
+        /// Print results of tests to console
+        /// </summary>
         public void PrintResults()
         {
             _testsExecuted.WaitOne();
@@ -92,7 +112,6 @@ namespace Source
             ExecuteAllMethodsWithAttribute<BeforeClassAttribute>(testClass, testClassInstance);
             ExecuteAllMethodsWithAttribute<TestAttribute>(testClass, testClassInstance);
             ExecuteAllMethodsWithAttribute<AfterClassAttribute>(testClass, testClassInstance);
-            _testsExecuted.Set();
         }
 
         private void ExecuteAllMethodsWithAttribute<T>(Type testClass, object testClassInstance)

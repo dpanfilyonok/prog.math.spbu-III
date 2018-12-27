@@ -4,6 +4,9 @@ using Source;
 
 namespace Tests
 {
+    /// <summary>
+    /// Tests for MuyNUnit Test Launcher
+    /// </summary>
     [TestClass]
     public class MyNUnitTests
     {
@@ -17,6 +20,9 @@ namespace Tests
             return pathPrefix + projName + pathPostfix;
         }
 
+        /// <summary>
+        /// BeforeClassAttribute behavior test
+        /// </summary>
         [TestMethod]
         public void BeforeClassShouldBeExecutedProperly()
         {
@@ -26,6 +32,9 @@ namespace Tests
             Assert.AreEqual(2, BeforeClassTest.BeforeClassTest.CheckValue);
         }
 
+        /// <summary>
+        /// AfterClassAttribute behavior test
+        /// </summary>
         [TestMethod]
         public void AfterClassShouldBeExecutedProperly()
         {
@@ -35,6 +44,9 @@ namespace Tests
             Assert.AreEqual(2, AfterClassTest.AfterClassTest.CheckValue);
         }
 
+        /// <summary>
+        /// BeforeClassAttribute and AfterClassAttribute behavior test
+        /// </summary>
         [TestMethod]
         public void BeforeClassAndAfterClassShouldBeExecutedProperly()
         {
@@ -43,7 +55,10 @@ namespace Tests
             _launcher.LaunchTesting();
             Assert.AreEqual(4, BeforeClassAndAfterClassTest.BeforeClassAndAfterClassTest.CheckValue);
         }
-        
+
+        /// <summary>
+        /// BeforeAttribute and AfterAttribute behavior test
+        /// </summary>
         [TestMethod]
         public void BeforeAndAfterShouldbeExecutedProperly()
         {
@@ -53,6 +68,9 @@ namespace Tests
             Assert.AreEqual(4 * 3, BeforeAndAfterTest.BeforeAndAfterTest.CheckValue);
         }
 
+        /// <summary>
+        /// BeforeAttribute methods should be executed on same instance
+        /// </summary>
         [TestMethod]
         public void BeforeAndTestShouldbeExecutedOnTheSameInstance()
         {
@@ -62,6 +80,9 @@ namespace Tests
             Assert.AreEqual(BeforeInstanceTest.BeforeInstanceTest.TestHash, BeforeInstanceTest.BeforeInstanceTest.BeforeHash);
         }
 
+        /// <summary>
+        /// AfterAttribute methods should be executed on same instance
+        /// </summary>
         [TestMethod]
         public void AfterAndTestShouldbeExecutedOnTheSameInstance()
         {
@@ -71,6 +92,9 @@ namespace Tests
             Assert.AreEqual(AfterInstanceTest.AfterInstanceTest.TestHash, AfterInstanceTest.AfterInstanceTest.AfterHash);
         }
 
+        /// <summary>
+        /// Smoke tests
+        /// </summary>
         [TestMethod]
         public void TestsResultsShouldBeCorrect()
         {
@@ -82,6 +106,9 @@ namespace Tests
             Assert.AreEqual(2, _launcher.Ignored);
         }
 
+        /// <summary>
+        /// Test methods with expected exception behavior tests
+        /// </summary>
         [TestMethod]
         public void TestsWithExpectedExceptionResultsShouldBeCorrect()
         {
