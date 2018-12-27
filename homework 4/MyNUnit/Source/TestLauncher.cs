@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Source.Attributes;
+using Source.Exceptions;
 
 namespace Source
 {
@@ -108,13 +109,12 @@ namespace Source
 
         private void RunTests(Type testClass)
         {
-            var testClassInstance = Activator.CreateInstance(testClass);
-            ExecuteAllMethodsWithAttribute<BeforeClassAttribute>(testClass, testClassInstance);
-            ExecuteAllMethodsWithAttribute<TestAttribute>(testClass, testClassInstance);
-            ExecuteAllMethodsWithAttribute<AfterClassAttribute>(testClass, testClassInstance);
+            ExecuteAllMethodsWithAttribute<BeforeClassAttribute>(testClass);
+            ExecuteAllMethodsWithAttribute<TestAttribute>(testClass);
+            ExecuteAllMethodsWithAttribute<AfterClassAttribute>(testClass);
         }
 
-        private void ExecuteAllMethodsWithAttribute<T>(Type testClass, object testClassInstance)
+        private void ExecuteAllMethodsWithAttribute<T>(Type testClass, object testClassInstance = null)
             where T : Attribute
         {
             testClass
@@ -125,21 +125,30 @@ namespace Source
                 .AsParallel()
                 .ForAll(methodInfo =>
                 {
-                    if (typeof(T) == typeof(TestAttribute))
+                    var instance = testClassInstance ?? Activator.CreateInstance(testClass);
+                    ValidateMethodForAttribute<T>(methodInfo);
+                    switch (typeof(T))
                     {
-                        ExecuteTestMethod(methodInfo, testClassInstance);
-                    }
-                    else
-                    {
-                        methodInfo.Invoke(testClassInstance, null);
+                        case Type testAttr when (testAttr == typeof(TestAttribute)):
+                            ExecuteTestMethod(methodInfo, instance);
+                            break;
+                        case Type simpleAttr when (simpleAttr == typeof(BeforeAttribute) || simpleAttr == typeof(AfterAttribute)):
+                            methodInfo.Invoke(instance, null);
+                            break;
+                        case Type classAttr when (classAttr == typeof(BeforeClassAttribute) || classAttr == typeof(AfterClassAttribute)):
+                            methodInfo.Invoke(null, null);
+                            break;
+                        default:
+                            throw new Exception();
                     }
                 });
         }
 
-        private void ExecuteTestMethod(MethodInfo mInfo, object testClassInstance)
+        private void ExecuteTestMethod(MethodInfo mInfo, object instance)
         {
             var testAttribute = Attribute.GetCustomAttribute(mInfo, typeof(TestAttribute)) as TestAttribute;
             TestInfo testInfo;
+
             if (testAttribute.Ignore != null)
             {
                 testInfo = new TestInfo(mInfo.Name, Results.Ignored, ignoreReason: testAttribute.Ignore);
@@ -148,10 +157,7 @@ namespace Source
                 return;
             }
 
-            var testClass = mInfo.DeclaringType;
-            var instance = Activator.CreateInstance(testClass);
-
-            ExecuteAllMethodsWithAttribute<BeforeAttribute>(testClass, testClassInstance);
+            ExecuteAllMethodsWithAttribute<BeforeAttribute>(mInfo.DeclaringType, instance);
 
             var succeeded = false;
             var stopWatch = Stopwatch.StartNew();
@@ -176,9 +182,34 @@ namespace Source
             {
                 Failed++;
             }
-            
+
             _executedTestInfos.Add(testInfo);
-            ExecuteAllMethodsWithAttribute<AfterAttribute>(testClass, testClassInstance);
+
+            ExecuteAllMethodsWithAttribute<AfterAttribute>(mInfo.DeclaringType, instance);
+        }
+
+        private static void ValidateMethodForAttribute<T>(MethodInfo mInfo)
+        {
+            bool isValid = false;
+            switch (typeof(T))
+            {
+                case Type testAttr when (testAttr == typeof(TestAttribute)):
+                    isValid = mInfo.ReturnType == typeof(void) && mInfo.GetParameters().Length == 0;
+                    break;
+                case Type classAttr when (classAttr == typeof(BeforeClassAttribute) || classAttr == typeof(AfterClassAttribute)):
+                    isValid = mInfo.IsStatic && mInfo.ReturnType == typeof(void) && mInfo.GetParameters().Length == 0;
+                    break;
+                case Type simpleAttr when (simpleAttr == typeof(BeforeAttribute) || simpleAttr == typeof(AfterAttribute)):
+                    isValid = mInfo.ReturnType == typeof(void) && mInfo.GetParameters().Length == 0;
+                    break;
+                default:
+                    break;
+            }
+
+            if (!isValid)
+            {
+                throw new InvalidTestMethodSignatureException();
+            }
         }
     }
 }
