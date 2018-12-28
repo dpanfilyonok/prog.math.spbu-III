@@ -23,17 +23,11 @@ namespace ClientTests
         public void Init()
         {
             _client = new SimpleFTPClient();
-            Task.Run(() =>
+            var task = Task.Factory.StartNew(() =>
             {
                 _server = new SimpleFTPServer(_ip, _port);
                 _server.RunAsync();
             });
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-           // _server.Stop();
         }
 
         /// <summary>

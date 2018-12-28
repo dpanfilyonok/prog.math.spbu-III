@@ -60,6 +60,7 @@ namespace ServerSource
         public async void RunAsync()
         {
             Console.WriteLine($"Server started, listening port {Port} ...");
+            Console.WriteLine(Directory.GetCurrentDirectory());
             while (!_cts.IsCancellationRequested)
             {
                 Console.WriteLine("Waiting for a connections...");
