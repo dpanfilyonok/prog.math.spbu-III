@@ -18,11 +18,14 @@ namespace ClientTests
         /// Попытка подключения к неработающему серверу должны вызывать ошибку
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(SocketException))]
         public async Task TryingToConnectToDisabledServerShouldRaiseSocketExceptionAsync()
         {
             var client = new SimpleFTPClient();
-            await client.ListAsync(_ip, _port, "soasla");
+            try
+            {
+                await client.ListAsync(_ip, _port, "soasla");
+            }
+            catch (SocketException) { }
         }
     }
 }

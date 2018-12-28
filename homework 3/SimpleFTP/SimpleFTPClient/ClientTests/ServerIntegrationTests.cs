@@ -17,7 +17,7 @@ namespace ClientTests
         private SimpleFTPClient _client;
         private SimpleFTPServer _server;
         private const string _ip = "localhost";
-        private const int _port = 2121;
+        private const int _port = 2120;
 
         [TestInitialize]
         public void Init()
@@ -28,6 +28,8 @@ namespace ClientTests
                 _server = new SimpleFTPServer(_ip, _port);
                 _server.RunAsync();
             });
+
+            Thread.Sleep(1000);
         }
 
         /// <summary>
