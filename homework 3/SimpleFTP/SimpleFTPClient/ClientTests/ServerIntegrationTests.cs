@@ -17,7 +17,7 @@ namespace ClientTests
         private SimpleFTPClient _client;
         private SimpleFTPServer _server;
         private const string _ip = "127.0.0.1";
-        private const int _port = 2122;
+        private const int _port = 2222;
         private ManualResetEvent _serverStarted;
 
         [TestInitialize]
@@ -130,7 +130,7 @@ namespace ClientTests
         [TestMethod]
         public async Task ServerStressTest()
         {
-            _serverStarted.WaitOne();
+            // _serverStarted.WaitOne();
             var expectedLength = 1000;
             var listOfResponses = new List<List<(string, bool)>>();
             for (int i = 0; i < expectedLength; ++i)
