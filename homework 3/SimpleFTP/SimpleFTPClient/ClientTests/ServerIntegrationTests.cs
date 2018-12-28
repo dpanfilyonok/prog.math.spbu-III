@@ -16,51 +16,53 @@ namespace ClientTests
     {
         private SimpleFTPClient _client;
         private SimpleFTPServer _server;
-        private const string _ip = "localhost";
-        private const int _port = 2120;
+        private const string _ip = "127.0.0.1";
+        private const int _port = 2122;
+        private ManualResetEvent _serverStarted;
 
         [TestInitialize]
         public void Init()
         {
             _client = new SimpleFTPClient();
+            _serverStarted = new ManualResetEvent(false);
             var task = Task.Factory.StartNew(() =>
             {
                 _server = new SimpleFTPServer(_ip, _port);
                 _server.RunAsync();
             });
 
-            Thread.Sleep(1000);
+            // Thread.Sleep(1000);
         }
 
         /// <summary>
         /// Обращение к несуществующей папке должно вызывать ошибку
         /// </summary>
-        /// <returns></returns>
         [TestMethod]
         [ExpectedException(typeof(DirectoryNotFoundException))]
         public async Task TryingToMakeRequestToNonexistentFolderShouldRaiseException()
         {
-            await _client.ListAsync(_ip, _port, "../ServerTests/TestFolderNonexistent");
+            // _serverStarted.WaitOne();
+            await _client.ListAsync(_ip, _port, @"../ServerTests/TestFolderNonexistent");
         }
 
         /// <summary>
         /// Попытка скачать несуществующий файл должна вызывать ошибку
         /// </summary>
-        /// <returns></returns>
         [TestMethod]
         [ExpectedException(typeof(FileNotFoundException))]
         public async Task TryingToDownloadNonexistentFileShouldRaiseException()
         {
-            await _client.DownloadFileAsync(_ip, _port, "../ServerTests/TestFolder/nonexistent", ".");
+            // _serverStarted.WaitOne();
+            await _client.DownloadFileAsync(_ip, _port, @"../ServerTests/TestFolder/nonexistent", ".");
         }
 
         /// <summary>
         /// List должен возвращать список содержимого в папке
         /// </summary>
-        /// <returns></returns>
         [TestMethod]
         public async Task CorrectnessOfListMethodRequest()
         {
+            // _serverStarted.WaitOne();
             var expected = new HashSet<(string, bool)>()
             {
                 ("NestedFolder1", true),
@@ -79,15 +81,15 @@ namespace ClientTests
         /// <summary>
         /// При скачивании файла он действительно создается
         /// </summary>
-        /// <returns></returns>
         [TestMethod]
         public async Task CorrectnessOfDownloadMethod()
         {
-            var destinationPath = "../../../DownloadedFiles/123.jpg";
+            // _serverStarted.WaitOne();
+            var destinationPath = @"../../../DownloadedFiles/123.jpg";
             await _client.DownloadFileAsync(
                 _ip,
                 _port,
-                "../ServerTests/TestFolder/NestedFolder1/img.jpg",
+                @"../ServerTests/TestFolder/NestedFolder1/img.jpg",
                 destinationPath);
             Assert.IsTrue(File.Exists(destinationPath));
             File.Delete(destinationPath);
@@ -96,22 +98,22 @@ namespace ClientTests
         /// <summary>
         /// Скачивание 1 и того же файла не приводит к ошибке
         /// </summary>
-        /// <returns></returns>
         [TestMethod]
         public void DownloadingSingleFileFrom2RequestsShouldWorkCorrect()
         {
-            var destinationPath1 = "../../../DownloadedFiles/1.jpg";
-            var destinationPath2 = "../../../DownloadedFiles/2.jpg";
+            // _serverStarted.WaitOne();
+            var destinationPath1 = @"../../../DownloadedFiles/1.jpg";
+            var destinationPath2 = @"../../../DownloadedFiles/2.jpg";
 
             var t1 = _client.DownloadFileAsync(
                 _ip,
                 _port,
-                "../ServerTests/TestFolder/NestedFolder1/img.jpg",
+                @"../ServerTests/TestFolder/NestedFolder1/img.jpg",
                 destinationPath1);
             var t2 = _client.DownloadFileAsync(
                 _ip,
                 _port,
-                "../ServerTests/TestFolder/NestedFolder1/img.jpg",
+                @"../ServerTests/TestFolder/NestedFolder1/img.jpg",
                 destinationPath2);
 
             Task.WaitAll(t1, t2);
@@ -125,10 +127,10 @@ namespace ClientTests
         /// <summary>
         /// Стресс тест
         /// </summary>
-        /// <returns></returns>
         [TestMethod]
         public async Task ServerStressTest()
         {
+            _serverStarted.WaitOne();
             var expectedLength = 1000;
             var listOfResponses = new List<List<(string, bool)>>();
             for (int i = 0; i < expectedLength; ++i)

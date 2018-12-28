@@ -10,10 +10,10 @@ namespace ServerSource
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            const string host = "localhost";
+            const string host = "127.0.0.1";
             const int port = 2121;
 
-            var server = new SimpleFTPServer(host, port);
+            var server = new SimpleFTPServer(host, int.Parse(args[0]));
             try
             {
                 server.RunAsync();

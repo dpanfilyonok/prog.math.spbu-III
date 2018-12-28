@@ -23,8 +23,23 @@ namespace ClientSource
         /// <returns>List of content</returns>
         public async Task<List<(string, bool)>> ListAsync(string hostIp, int hostPort, string path)
         {
-            var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
-            return await ListAsync(host, path);
+            var request = SimpleFTPClientUtils.FormRequest(Methods.List, path);
+            var response = "";
+
+            using (var client = new TcpClient())
+            {
+                await client.ConnectAsync(hostIp, hostPort);
+                using (var stream = client.GetStream())
+                {
+                    var writer = new StreamWriter(stream) { AutoFlush = true };
+                    await writer.WriteLineAsync(request);
+
+                    var reader = new StreamReader(stream);
+                    response = await reader.ReadLineAsync();
+                }
+            }
+
+            return SimpleFTPClientUtils.ParseListResponse(response);
         }
 
         /// <summary>
@@ -65,8 +80,33 @@ namespace ClientSource
         /// <exception cref="SocketException"></exception>
         public async Task DownloadFileAsync(string hostIp, int hostPort, string path, string pathToSave)
         {
-            var host = SimpleFTPClientUtils.ConvertToEndPoint(hostIp, hostPort);
-            await DownloadFileAsync(host, path, pathToSave);
+            var request = SimpleFTPClientUtils.FormRequest(Methods.Get, path);
+            using (var client = new TcpClient())
+            {
+                await client.ConnectAsync(hostIp, hostPort);
+                using (var stream = client.GetStream())
+                {
+                    var writer = new StreamWriter(stream) { AutoFlush = true };
+                    await writer.WriteLineAsync(request);
+
+                    var reader = new StreamReader(stream);
+                    if (!int.TryParse(await reader.ReadLineAsync(), out int size))
+                    {
+                        throw new Exception("LUL");
+                    }
+
+                    if (size == -1)
+                    {
+                        throw new FileNotFoundException("File don`t exist on server", path);
+                    }
+
+                    using (var fstream = new FileStream(pathToSave, FileMode.CreateNew))
+                    {
+                        await stream.CopyToAsync(fstream);
+                        await fstream.FlushAsync();
+                    }
+                }
+            }
         }
 
         /// <summary>
