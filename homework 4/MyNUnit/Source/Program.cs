@@ -2,8 +2,11 @@
 using System.IO;
 
 namespace Source
-{
-    class Program
+{  
+    /// <summary>
+    /// Программа, выполняющая тестирование указанной директории и печатающая результат в консоль
+    /// </summary>
+    public class Program
     {
         static void Main(string[] args)
         {

@@ -1,5 +1,8 @@
 ﻿namespace Source.Exceptions
 {
+    /// <summary>
+    /// Бросается, если тестовый метод имеет неверную сигнатуру
+    /// </summary>
     [System.Serializable]
     public class InvalidTestMethodSignatureException : System.Exception
     {

@@ -2,8 +2,8 @@ using System;
 
 namespace Source.Attributes
 {
-    public sealed class AfterClassAttribute : Attribute
-    {
-        
-    }
+    /// <summary>
+    /// Атрибут, которым помечается метод, выполняемый после выполнения всех тестов в классе
+    /// </summary>
+    public sealed class AfterClassAttribute : Attribute { }
 }

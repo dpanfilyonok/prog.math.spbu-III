@@ -18,7 +18,7 @@ namespace Source
     public class TestLauncher
     {
         private ConcurrentBag<TestInfo> _executedTestInfos;
-        private ManualResetEvent _testsExecuted;
+        // private ManualResetEvent _testsExecuted;
         private readonly string _pathToTestDir;
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Source
         public TestLauncher(string pathToDir)
         {
             _executedTestInfos = new ConcurrentBag<TestInfo>();
-            _testsExecuted = new ManualResetEvent(false);
+            // _testsExecuted = new ManualResetEvent(false);
             _pathToTestDir = pathToDir;
         }
 
@@ -50,7 +50,7 @@ namespace Source
         {
             var types = GetAssembliesInDir(_pathToTestDir);
             Parallel.ForEach(types, RunTests);
-            _testsExecuted.Set();
+            // _testsExecuted.Set();
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Source
         /// </summary>
         public void PrintResults()
         {
-            _testsExecuted.WaitOne();
+            // _testsExecuted.WaitOne();
 
             var succeeded = 0;
             var failed = 0;
@@ -125,15 +125,14 @@ namespace Source
                 .AsParallel()
                 .ForAll(methodInfo =>
                 {
-                    var instance = testClassInstance ?? Activator.CreateInstance(testClass);
                     ValidateMethodForAttribute<T>(methodInfo);
                     switch (typeof(T))
                     {
                         case Type testAttr when (testAttr == typeof(TestAttribute)):
-                            ExecuteTestMethod(methodInfo, instance);
+                            ExecuteTestMethod(methodInfo, testClassInstance);
                             break;
                         case Type simpleAttr when (simpleAttr == typeof(BeforeAttribute) || simpleAttr == typeof(AfterAttribute)):
-                            methodInfo.Invoke(instance, null);
+                            methodInfo.Invoke(testClassInstance, null);
                             break;
                         case Type classAttr when (classAttr == typeof(BeforeClassAttribute) || classAttr == typeof(AfterClassAttribute)):
                             methodInfo.Invoke(null, null);
@@ -144,7 +143,7 @@ namespace Source
                 });
         }
 
-        private void ExecuteTestMethod(MethodInfo mInfo, object instance)
+        private void ExecuteTestMethod(MethodInfo mInfo, object testClassInstance)
         {
             var testAttribute = Attribute.GetCustomAttribute(mInfo, typeof(TestAttribute)) as TestAttribute;
             TestInfo testInfo;
@@ -156,6 +155,8 @@ namespace Source
                 Ignored++;
                 return;
             }
+
+            var instance = testClassInstance ?? Activator.CreateInstance(mInfo.DeclaringType);
 
             ExecuteAllMethodsWithAttribute<BeforeAttribute>(mInfo.DeclaringType, instance);
 

@@ -2,8 +2,8 @@ using System;
 
 namespace Source.Attributes
 {
-    public sealed class BeforeAttribute : Attribute
-    {
-        
-    }
+    /// <summary>
+    /// Атрибут, которым помечается метод, выполняемый до каждого теста
+    /// </summary>
+    public sealed class BeforeAttribute : Attribute { }
 }
