@@ -8,9 +8,9 @@ namespace AfterClassTest
         public static int CheckValue { get; private set; } = 0;
 
         [AfterClass]
-        public void Increment1() => CheckValue++;
+        public static void Increment1() => CheckValue++;
 
         [AfterClass]
-        public void Increment2() => CheckValue++;
+        public static void Increment2() => CheckValue++;
     }
 }
