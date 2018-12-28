@@ -29,9 +29,14 @@
         /// </summary>
         private readonly CancellationTokenSource _interruptPoolCancellationTokenSource;
 
+        private volatile int _runningThreads;
+        private ManualResetEvent _allThreadsFinished;
+
         public MyThreadPool(int amountOfThreads)
         {
             _maxAmountOfThreads = amountOfThreads;
+            _runningThreads = amountOfThreads;
+            _allThreadsFinished = new ManualResetEvent(false);
             _tasksQueue = new BlockingCollection<Action<bool>>();
             _interruptPoolCancellationTokenSource = new CancellationTokenSource();
 
@@ -64,6 +69,12 @@
                 }
                 catch (OperationCanceledException) { }
             }
+
+            _runningThreads--;
+            if (_runningThreads == 0)
+            {
+                _allThreadsFinished.Set();
+            }
         }
 
         /// <summary>
@@ -87,13 +98,13 @@
             {
                 _tasksQueue.Add(task.ExecuteTaskManually, _interruptPoolCancellationTokenSource.Token);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("", e);
             }
-            catch (NullReferenceException)
+            catch (NullReferenceException e)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("", e);
             }
 
             return task;
@@ -107,6 +118,7 @@
         {
             _interruptPoolCancellationTokenSource.Cancel();
             _tasksQueue?.CompleteAdding();
+            _allThreadsFinished.WaitOne();
             while (!_tasksQueue.IsCompleted)
             {
                 _tasksQueue.Take().Invoke(true);
