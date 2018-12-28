@@ -31,6 +31,7 @@
 
         private volatile int _runningThreads;
         private ManualResetEvent _allThreadsFinished;
+        private object _lockObject = new object();
 
         public MyThreadPool(int amountOfThreads)
         {
@@ -70,7 +71,11 @@
                 catch (OperationCanceledException) { }
             }
 
-            _runningThreads--;
+            lock (_lockObject)
+            {
+                _runningThreads--;
+            }
+
             if (_runningThreads == 0)
             {
                 _allThreadsFinished.Set();
