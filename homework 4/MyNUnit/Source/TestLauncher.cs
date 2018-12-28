@@ -169,7 +169,7 @@ namespace Source
             catch (Exception e)
             {
                 succeeded = testAttribute.ExpectedException != null &&
-                    e.InnerException.GetType() == testAttribute.ExpectedException.GetType();
+                    e.InnerException.GetType() == testAttribute.ExpectedException;
             }
 
             stopWatch.Stop();
