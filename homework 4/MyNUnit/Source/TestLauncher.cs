@@ -18,8 +18,9 @@ namespace Source
     public class TestLauncher
     {
         private ConcurrentBag<TestInfo> _executedTestInfos;
-        // private ManualResetEvent _testsExecuted;
         private readonly string _pathToTestDir;
+
+        private readonly object lockO = new object();
 
         /// <summary>
         /// Amount of succeeded tests
@@ -39,7 +40,6 @@ namespace Source
         public TestLauncher(string pathToDir)
         {
             _executedTestInfos = new ConcurrentBag<TestInfo>();
-            // _testsExecuted = new ManualResetEvent(false);
             _pathToTestDir = pathToDir;
         }
 
@@ -50,7 +50,6 @@ namespace Source
         {
             var types = GetAssembliesInDir(_pathToTestDir);
             Parallel.ForEach(types, RunTests);
-            // _testsExecuted.Set();
         }
 
         /// <summary>
@@ -58,8 +57,6 @@ namespace Source
         /// </summary>
         public void PrintResults()
         {
-            // _testsExecuted.WaitOne();
-
             var succeeded = 0;
             var failed = 0;
             var ignored = 0;
@@ -152,7 +149,10 @@ namespace Source
             {
                 testInfo = new TestInfo(mInfo.Name, Results.Ignored, ignoreReason: testAttribute.Ignore);
                 _executedTestInfos.Add(testInfo);
-                Ignored++;
+                lock (lockO)
+                {
+                    Ignored++;
+                }
                 return;
             }
 
@@ -177,11 +177,17 @@ namespace Source
             testInfo = new TestInfo(mInfo.Name, succeeded ? Results.Succeeded : Results.Failed, completionTime: stopWatch.ElapsedMilliseconds);
             if (testInfo.Result == Results.Succeeded)
             {
-                Succeeded++;
+                lock (lockO)
+                {
+                    Succeeded++;
+                }
             }
             else
             {
-                Failed++;
+                lock (lockO)
+                {
+                    Failed++;
+                }
             }
 
             _executedTestInfos.Add(testInfo);
