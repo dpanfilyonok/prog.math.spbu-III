@@ -43,34 +43,6 @@ namespace ClientSource
         }
 
         /// <summary>
-        /// Returns content of directory on server
-        /// </summary>
-        /// <param name="host">Remote server address</param>
-        /// <param name="path">Path to dir</param>
-        /// <exception cref="SocketException"></exception>
-        /// <returns>List of content</returns>
-        public async Task<List<(string, bool)>> ListAsync(IPEndPoint host, string path)
-        {
-            var request = SimpleFTPClientUtils.FormRequest(Methods.List, path);
-            var response = "";
-
-            using (var client = new TcpClient())
-            {
-                client.Connect(host);
-                using (var stream = client.GetStream())
-                {
-                    var writer = new StreamWriter(stream) { AutoFlush = true };
-                    await writer.WriteLineAsync(request);
-
-                    var reader = new StreamReader(stream);
-                    response = await reader.ReadLineAsync();
-                }
-            }
-
-            return SimpleFTPClientUtils.ParseListResponse(response);
-        }
-
-        /// <summary>
         /// Download file from remote server
         /// </summary>
         /// <param name="hostIp">Server remote IP</param>
@@ -84,44 +56,6 @@ namespace ClientSource
             using (var client = new TcpClient())
             {
                 await client.ConnectAsync(hostIp, hostPort);
-                using (var stream = client.GetStream())
-                {
-                    var writer = new StreamWriter(stream) { AutoFlush = true };
-                    await writer.WriteLineAsync(request);
-
-                    var reader = new StreamReader(stream);
-                    if (!int.TryParse(await reader.ReadLineAsync(), out int size))
-                    {
-                        throw new Exception("LUL");
-                    }
-
-                    if (size == -1)
-                    {
-                        throw new FileNotFoundException("File don`t exist on server", path);
-                    }
-
-                    using (var fstream = new FileStream(pathToSave, FileMode.CreateNew))
-                    {
-                        await stream.CopyToAsync(fstream);
-                        await fstream.FlushAsync();
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Download file from remote server
-        /// </summary>
-        /// <param name="host">Remote server address</param>
-        /// <param name="path">Path to file server</param>
-        /// <param name="pathToSave">Path where to download file</param>
-        /// <exception cref="SocketException"></exception>
-        public async Task DownloadFileAsync(IPEndPoint host, string path, string pathToSave)
-        {
-            var request = SimpleFTPClientUtils.FormRequest(Methods.Get, path);
-            using (var client = new TcpClient())
-            {
-                client.Connect(host);
                 using (var stream = client.GetStream())
                 {
                     var writer = new StreamWriter(stream) { AutoFlush = true };

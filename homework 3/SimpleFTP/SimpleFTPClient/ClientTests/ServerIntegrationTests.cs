@@ -5,6 +5,7 @@ using System.Threading;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
 
 namespace ClientTests
 {
@@ -72,7 +73,8 @@ namespace ClientTests
                 ("3", false)
             };
 
-            var response = await _client.ListAsync(_ip, _port, @"../ServerTests/TestFolder");
+            Console.WriteLine(Directory.GetCurrentDirectory());
+            var response = await _client.ListAsync(_ip, _port, @"../../../../../SimpleFTPServer/ServerTests/TestFolder");
             var actual = new HashSet<(string, bool)>(response);
 
             Assert.IsTrue(expected.IsSubsetOf(actual) && actual.IsSubsetOf(expected));
