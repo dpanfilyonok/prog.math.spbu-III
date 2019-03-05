@@ -1,6 +1,7 @@
 language: csharp
 solution: ./homework\ 4/MyNUnit/MyNUnit.sln
 
+
 git:
   depth: 1
 
