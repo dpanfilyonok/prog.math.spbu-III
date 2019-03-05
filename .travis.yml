@@ -1,5 +1,6 @@
 language: csharp
-solution: ./homework\ 1/Lazy/Lazy.sln.sln
+solution: ./homework\ 2/MyThreadPool/MyThreadPool.sln
+
 
 git:
   depth: 1
@@ -9,11 +10,11 @@ dotnet: 2.1
 
 branches:
   only:
-    - hw_1/Lazy
+    - hw_2/MyThreadPool
   
 matrix:
   include:
     - script:
-      - cd ./homework\ 1/Lazy && dotnet restore && dotnet build
+      - cd ./homework\ 2/MyThreadPool && dotnet restore && dotnet build
     - script:
-      - dotnet test ./homework\ 1/Lazy/Tests/
+      - dotnet test ./homework\ 2/MyThreadPool/Tests/
