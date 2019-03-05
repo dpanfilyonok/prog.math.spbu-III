@@ -1,6 +1,5 @@
 language: csharp
-solution: ./homework\ 2/MyThreadPool/MyThreadPool.sln
-
+solution: ./homework\ 3/SimpleFTP/SimpleFTP.sln
 
 git:
   depth: 1
@@ -10,11 +9,13 @@ dotnet: 2.1
 
 branches:
   only:
-    - hw_2/MyThreadPool
+    - hw_3/SimpleFTP
   
 matrix:
   include:
     - script:
-      - cd ./homework\ 2/MyThreadPool && dotnet restore && dotnet build
+      - cd ./homework\ 3/SimpleFTP && dotnet restore && dotnet build
     - script:
-      - dotnet test ./homework\ 2/MyThreadPool/Tests/
+      - dotnet test ./homework\ 3/SimpleFTP/SimpleFTPClient/ClientTests
+    - script:
+      - dotnet test ./homework\ 3/SimpleFTP/SimpleFTPServer/ServerTests
