@@ -10,7 +10,6 @@ dotnet: 2.1
 branches:
   only:
     - hw_3/SimpleFTP
-
   
 matrix:
   include:
@@ -20,4 +19,3 @@ matrix:
       - dotnet test ./homework\ 3/SimpleFTP/SimpleFTPClient/ClientTests
     - script:
       - dotnet test ./homework\ 3/SimpleFTP/SimpleFTPServer/ServerTests
-
